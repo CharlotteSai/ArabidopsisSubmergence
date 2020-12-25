@@ -1,0 +1,126 @@
+---
+title: "GO_analysis"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r package loading}
+library(tidyverse)
+library(magrittr)
+library(biomaRt)
+library(parallel)
+library(GO.db)
+library(annotate)
+library(scales)
+
+options(stringsAsFactors = FALSE)
+```
+
+```{r download gene with go info from ensembl}
+# To choose BioMart database and construct information needed
+listMarts(host="plants.ensembl.org")
+m <- useMart("plants_mart", dataset="athaliana_eg_gene", host="plants.ensembl.org")
+# listDatasets(m) # check plants info version 
+# attributes <- listAttributes(m) # Choose data types you want to download
+
+go <- getBM(attributes=c("ensembl_gene_id","go_id"), mart=m)
+colnames(go) <- c("Gene stable ID", "GO term accession")
+```
+
+```{r collect go for genes}
+# Collect all the ancestor terms for each GO term
+goAncestors <- c(
+  as.list(GOBPANCESTOR),
+  as.list(GOCCANCESTOR),
+  as.list(GOMFANCESTOR)
+)
+# Define the Root nodes
+rootGO <- c("all", BP = "GO:0008150", CC = "GO:0005575", MF = "GO:0003674")
+
+# Collect all the GO terms for each gene
+# gene2go with only accession no.
+nCores <- min(detectCores() - 1, 12)
+gene2GO <- go %>%
+  dplyr::filter(!is.na(`GO term accession`)) %>%
+  distinct(`Gene stable ID`,  `GO term accession`) %>%
+  split(f = .$`Gene stable ID`) %>% 
+  lapply(function(x){x[["GO term accession"]]}) %>%
+  mclapply(function(x){
+    unlist(goAncestors[x]) %>% 
+      unique() %>%
+      setdiff(rootGO)
+  }, mc.cores = nCores)
+# Remove any with no GO terms again
+gene2GO <- gene2GO[vapply(gene2GO, length, numeric(1)) > 0]
+
+
+# match the info we gathered from gene2go that bring in ancestors
+go2Gene <- lapply(names(gene2GO), function(x){
+  tibble(GeneID = x,
+         GO = gene2GO[x] %>% unlist())
+}) %>% bind_rows() %>% 
+  distinct(GeneID,GO) %>%
+  split(f = .$GO) %>%
+  lapply(function(x){
+    x[["GeneID"]]
+  }) 
+
+# add extra info for later filtering the GO path, by default shortest path should >= 4
+goSummaries <- url("https://uofabioinformaticshub.github.io/summaries2GO/data/goSummaries.RDS") %>%
+  readRDS()
+```
+
+```{r prepare everything for go fisher exact test}
+#---------input DE gene----------#
+genes <- DGEs$gad1CS
+genes$GeneID %>%
+   length()
+genes$GeneID %>%
+  intersect(names(gene2GO)) %>% length()
+#--------------------------------#
+
+All_GO <- lapply(unique(genes$expression), function(r){
+  data <- genes %>% filter(expression == r)
+  gene.list <- data$geneID %>% intersect(names(gene2GO))
+  notDE <- setdiff(names(gene2GO), gene.list)
+  allGO <- gene2GO %>% unlist() %>% unique() 
+  nDE <- length(gene.list)
+  nNotDE <- length(notDE) 
+  allGO %>% 
+    mclapply(function(x){
+      # Count the DE genes with a given GO term
+      a <- sum(vapply(gene2GO[gene.list], function(id){x %in% id}, logical(1)))
+      # Count the notDE genes with a given GO term
+      b <- sum(vapply(gene2GO[notDE], function(id){x %in% id}, logical(1)))
+      mat <- c(a, b, nDE - a, nNotDE - b) %>%
+        matrix(nrow = 2) %>%
+        set_colnames(c("withGO", "withoutGO")) %>%
+        set_rownames(c("DE", "notDE"))
+      ft <- fisher.test(mat)
+      tibble(
+        ID = x,
+        N = sum(mat[,"withGO"]),
+        N.DE = mat["DE", "withGO"],
+        Expected = nDE * mat["notDE", "withGO"] / nNotDE, # expected number of DE genes in set of interested  
+        p = ft$p.value,
+        OR = ft$estimate
+      )
+    }, mc.cores = nCores) %>%
+    bind_rows() %>%
+    mutate(
+      adjP = p.adjust(p, "bonferroni"),
+      FDR = p.adjust(p, "fdr")
+    ) %>%
+    left_join(goSummaries, by = c("ID" = "id")) %>%
+    arrange(p) %>%
+    mutate(Term = Term(ID),
+           regulation = r) %>% 
+    dplyr::select(ID,Term,N.DE,Expected,N,everything())
+}) %>% bind_rows()
+```
+

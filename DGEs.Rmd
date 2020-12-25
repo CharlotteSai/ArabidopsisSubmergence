@@ -48,7 +48,7 @@ countList <- countList[keep,, keep.lib.sizes=FALSE] %>%
   calcNormFactors()
 
 # set control group as reference 
-countList$samples$group <-   relevel(countList$samples$group, ref = "Col")
+countList$samples$group <-  relevel(countList$samples$group, ref = "Col")
 ```
 
 ```{r mds}
@@ -140,7 +140,8 @@ names(vocanoPlots) <- colnames(myContrast)
 # the filtering applied with both adj.p and logFC
 DGEs <- lapply(names(deRes), function(i){
   deRes[[i]] %>% 
-  filter(adj.p < 0.05 & abs(logFC) >= 1)
+  filter(adj.p < 0.05 & abs(logFC) >= 1) %>% 
+  mutate(expression = ifelse(logFC > 1 ,'Up','Down'))
 })
 names(DGEs) <- names(deRes)
 
@@ -156,5 +157,7 @@ lapply(geno, function(g){
 }) %>% 
   as.data.frame() %>%
   vennDiagram(circle.col=c("turquoise", "salmon","slateblue"))
+
+# save.image("~/Box/Bioinfo/ArabidopsisSubmergence/DGEs.RData")
 ```
 
