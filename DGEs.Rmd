@@ -15,7 +15,8 @@ library(magrittr)
 library(edgeR)
 ```
 
-```{r}
+```{r data clean up}
+# load and clean up gene counts
 geneCounts <- read_delim("4_Counts/Ying_Submergence_batch1_final.txt", 
                          delim = "\t", 
                          comment = "#") %>% 
@@ -30,16 +31,24 @@ meta <- tibble(sample = colnames(geneCounts),
                group = paste(genotype, submergence, sep = "_") # this info will fill to 'group' as col name match 'group' pram in DGEList() and converting to a single factor Exp
 )
 
+# because I am only focus on genotype difference in control condition, Thus I only use data in control condition
+meta %<>% 
+  filter(submergence == "cont") %>%
+  select(-group, -submergence)
+geneCounts %<>% select(meta$sample)
+
+# construct DGElist, filtering and normalize RNA composition
 countList <- DGEList(counts = geneCounts,
-                     samples = meta) 
+                     group = meta$genotype) 
 
 keep <- filterByExpr(countList)
+# By default, the function keeps genes with about 10 read counts or more in a minimum number of samples, where the number of samples is chosen according to the minimum group sample size. The actual filtering uses CPM values rather than counts in order to avoid giving preference to samples with large library sizes. For this dataset, the median library size is about 18 million and 10/18 approx. 0.55, so the filterByExpr function keeps genes that have a CPM of 0.55 or more in at least 4 samples.
 table(keep)
 countList <- countList[keep,, keep.lib.sizes=FALSE] %>% 
   calcNormFactors()
 
 # set control group as reference 
-countList$samples$group <-   relevel(countList$samples$group, ref = "Col_cont")
+countList$samples$group <-   relevel(countList$samples$group, ref = "Col")
 ```
 
 ```{r mds}
@@ -52,8 +61,7 @@ mds %>%
   rownames_to_column("sample") %>%
   left_join(meta) %>%
   ggplot(aes(x = x, y = y)) +
-  geom_point(aes(colour  = genotype,
-                 shape = submergence), 
+  geom_point(aes(colour  = genotype), 
              size = 3) +
   theme_bw() +
   labs(x = "BCV distance 1",
@@ -74,17 +82,34 @@ colnames(designMat) <- levels(countList$samples$group)
 # fit to model
 fit <- glmQLFit(counts_Disp, design = designMat)
 
-myContrast <- makeContrasts(wt = Col_sub - Col_cont,
+# make contrast easy to follow
+myContrast <- makeContrasts(gad1CS = gad1CS - Col,
+                            gad1SALK = gad1SALK - Col,
+                            gad21 = gad21 - Col,
+                            gad1245 = gad1245 - Col,
+                            gad2OEB33 = gad2OEB33 - Col,
+                            pop28 = pop28 - Col,
+                            gad1245_special = gad1245 - (gad21 + Col)/2, 
+                            # gad1245 diff compare to wt apart from the diff form gad21
                             levels = designMat)
 ```
 
-```{r}
-wt <- glmQLFTest(fit, contrast = myContrast[,"wt"])
-wtGenes <- wt$table %>% 
+```{r find DE genes and corisponding vocano plots}
+# run a loop to go through test by each genotype compare to wt (Col)
+deRes <- lapply(colnames(myContrast), function(i){
+  qlf <- glmQLFTest(fit, contrast = myContrast[,i])
+  qlf$table %>% 
   rownames_to_column("GeneID") %>% 
-  mutate(adj.p = p.adjust(PValue, method = "BH"))
+  mutate(adj.p = p.adjust(PValue, method = "BH"),
+         comparison = ifelse(i != "gad1245_special",
+                             paste0(i,"-wt"),
+                             i))
+})
+names(deRes) <- colnames(myContrast)
 
-wtGenes %>% 
+vocanoPlots <- lapply(colnames(myContrast), function(i){
+  lim = max(abs(deRes[[i]]$logFC))
+  deRes[[i]] %>% 
   mutate(expression = ifelse(adj.p < 0.05 & abs(logFC) >= 1, 
                              ifelse(logFC > 1 ,'Up','Down'),
                              'Stable')) %>% 
@@ -93,7 +118,8 @@ wtGenes %>%
              colour = expression)) +
   geom_point(alpha = 0.4, size = 3.5) +
   scale_color_manual(values=c("blue", "grey","red"))+
-  xlim(c(-16, 16)) +
+  xlim(c(-lim - 0.5,
+         lim + 0.5)) +
   geom_vline(xintercept = c(-1,1),
              lty=4,col="black",
              lwd=0.8) +
@@ -102,9 +128,33 @@ wtGenes %>%
              lwd=0.8) +
   labs(x="log2(fold change)",
        y="-log10 (adj.p-value)")  +
-  theme_bw()+
+  theme_bw() +
   theme(plot.title = element_text(hjust = 0.5), 
         legend.position="right", 
         legend.title = element_blank())
+})
+names(vocanoPlots) <- colnames(myContrast)
+```
+
+```{r prepare DGEs for GO}
+# the filtering applied with both adj.p and logFC
+DGEs <- lapply(names(deRes), function(i){
+  deRes[[i]] %>% 
+  filter(adj.p < 0.05 & abs(logFC) >= 1)
+})
+names(DGEs) <- names(deRes)
+
+# see overlap between gad21, gad1245 and gad1245 special
+geno <- names(deRes) %>% str_subset("gad21|gad1245")
+lapply(geno, function(g){
+  deRes[[g]] %>% 
+  mutate(sig = ifelse(adj.p < 0.05 & abs(logFC) >= 1, 
+                       1,0)) %>% 
+    column_to_rownames("GeneID") %>% 
+    select(sig) %>% 
+    set_names(g)
+}) %>% 
+  as.data.frame() %>%
+  vennDiagram(circle.col=c("turquoise", "salmon","slateblue"))
 ```
 
