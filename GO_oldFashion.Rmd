@@ -39,7 +39,7 @@ gene2GO <- go %>%
   distinct(GeneID,GO_terms) %>% 
   split(f = .$GeneID) %>%
   mclapply(function(x){
-    unique(x$`GO_terms`)
+    unique(x$GO_terms)
   }, mc.cores = nCores)
 # Remove any with no GO terms
 gene2GO <- gene2GO[vapply(gene2GO, length, numeric(1)) > 0]
