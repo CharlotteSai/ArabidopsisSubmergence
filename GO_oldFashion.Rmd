@@ -58,37 +58,36 @@ rootGO <- list(
   CC = "GO:0005575",
   MF = "GO:0003674"
 )
-# Define the terms with <= 1 step back to the root nodes
-firstLevelGO <- list(
-  BP = c(rootGO$BP, get(rootGO$BP, GOBPCHILDREN)),
-  CC = c(rootGO$CC, get(rootGO$CC, GOCCCHILDREN)),
-  MF = c(rootGO$MF, get(rootGO$MF, GOMFCHILDREN))
-) %>%
-  lapply(unique)
-# Define the terms with <= 2 steps back to the root nodes
-secondLevelGO <- list(
-  BP = c(firstLevelGO$BP, lapply(firstLevelGO$BP, get, GOBPCHILDREN)),
-  CC = c(firstLevelGO$CC, lapply(firstLevelGO$CC, get, GOCCCHILDREN)),
-  MF = c(firstLevelGO$MF, lapply(firstLevelGO$MF, get, GOMFCHILDREN))
-) %>%
-  lapply(unlist) %>%
-  lapply(unique) %>%
-  lapply(function(x){x[!is.na(x)]})
-# Define the terms with <= 3 steps back to the root nodes
-thirdLevelGO <- list(
-  BP = c(secondLevelGO$BP, lapply(secondLevelGO$BP, get, GOBPCHILDREN)),
-  CC = c(secondLevelGO$CC, lapply(secondLevelGO$CC, get, GOCCCHILDREN)),
-  MF = c(secondLevelGO$MF, lapply(secondLevelGO$MF, get, GOMFCHILDREN))
-) %>%
-  mclapply(unlist, mc.cores = nCores) %>%
-  mclapply(unique, mc.cores = nCores) %>%
-  mclapply(function(x){x[!is.na(x)]}, mc.cores = nCores)
-# Expand so each gene now has all parent terms correctly assigned and also removing GO terms which are 3rd level or below
+# # Define the terms with <= 1 step back to the root nodes
+# firstLevelGO <- list(
+#   BP = c(rootGO$BP, get(rootGO$BP, GOBPCHILDREN)),
+#   CC = c(rootGO$CC, get(rootGO$CC, GOCCCHILDREN)),
+#   MF = c(rootGO$MF, get(rootGO$MF, GOMFCHILDREN))
+# ) %>%
+#   lapply(unique)
+# # Define the terms with <= 2 steps back to the root nodes
+# secondLevelGO <- list(
+#   BP = c(firstLevelGO$BP, lapply(firstLevelGO$BP, get, GOBPCHILDREN)),
+#   CC = c(firstLevelGO$CC, lapply(firstLevelGO$CC, get, GOCCCHILDREN)),
+#   MF = c(firstLevelGO$MF, lapply(firstLevelGO$MF, get, GOMFCHILDREN))
+# ) %>%
+#   lapply(unlist) %>%
+#   lapply(unique) %>%
+#   lapply(function(x){x[!is.na(x)]})
+# # Define the terms with <= 3 steps back to the root nodes
+# thirdLevelGO <- list(
+#   BP = c(secondLevelGO$BP, lapply(secondLevelGO$BP, get, GOBPCHILDREN)),
+#   CC = c(secondLevelGO$CC, lapply(secondLevelGO$CC, get, GOCCCHILDREN)),
+#   MF = c(secondLevelGO$MF, lapply(secondLevelGO$MF, get, GOMFCHILDREN))
+# ) %>%
+#   mclapply(unlist, mc.cores = nCores) %>%
+#   mclapply(unique, mc.cores = nCores) %>%
+#   mclapply(function(x){x[!is.na(x)]}, mc.cores = nCores)
+# # Expand so each gene now has all parent terms correctly assigned and also removing GO terms which are 3rd level or below
 gene2GO %<>% mclapply(function(x){
   unlist(goAncestors[x]) %>% 
     unique %>%
-    setdiff(unlist(thirdLevelGO)) %>% # This is now one step deeper into the go terms
-    # setdiff(unlist(secondLevelGO)) %>%  # This is the original method
+    setdiff(unlist(rootGO)) %>% # remove the very top level
     setdiff("all")
 }, mc.cores = nCores)
 # Remove any with no GO terms again
@@ -148,6 +147,7 @@ All_GO <- lapply(unique(genes$expression), function(r){
         set_rownames(c("Genes of Interest", "Control Genes"))
       ft <- fisher.test(mat)
       mutate(df,
+             N = sum(mat[,"Genes With GO Term"]),
              Expected = nDE * df$notDECount[1] / nNotDE,
              #Expected = percent(df$notDECount / nNotDE), # The percentage of genes with the term in the control set
              # Observed = percent(df$DECount / nDE), # The percentage of genes with the term in the set of interest
@@ -161,10 +161,10 @@ All_GO <- lapply(unique(genes$expression), function(r){
            regulation = r) %>%
     left_join(goSummaries, by = c("Term" = "id")) %>%
     filter(DECount > Expected) %>% # consider the t.test is two-sided
-    dplyr::select(Term, Description, shortest_path, terminal_node, everything())
+    dplyr::select(Term, Description, DECount, Expected, N, everything())
 }) %>% 
   bind_rows()
 
-
+All_GO %>% filter(FDR < 0.05 & shortest_path >=4) %>% dim()
 ```
 
