@@ -1,5 +1,5 @@
 ---
-title: "GO_analysis"
+title: "GO_oldFashion"
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -17,7 +17,7 @@ library(parallel)
 library(GO.db)
 library(annotate)
 library(scales)
-
+nCores <- min(detectCores() - 1, 12)
 options(stringsAsFactors = FALSE)
 ```
 
@@ -28,11 +28,24 @@ m <- useMart("plants_mart", dataset="athaliana_eg_gene", host="plants.ensembl.or
 # listDatasets(m) # check plants info version 
 # attributes <- listAttributes(m) # Choose data types you want to download
 
-go <- getBM(attributes=c("ensembl_gene_id","go_id"), mart=m)
-colnames(go) <- c("Gene stable ID", "GO term accession")
+go <- getBM(attributes=c("ensembl_gene_id","go_id"), mart=m) %>% 
+  set_colnames(c("GeneID", "GO_terms"))
 ```
 
-```{r collect go for genes}
+```{r collect GO for genes}
+# attach go terms to each gene
+gene2GO <- go %>%
+  filter(!is.na(GO_terms)) %>%
+  distinct(GeneID,GO_terms) %>% 
+  split(f = .$GeneID) %>%
+  mclapply(function(x){
+    unique(x$GO_terms)
+  }, mc.cores = nCores)
+# Remove any with no GO terms
+gene2GO <- gene2GO[vapply(gene2GO, length, numeric(1)) > 0]
+```
+
+```{r build GO tree}
 # Collect all the ancestor terms for each GO term
 goAncestors <- c(
   as.list(GOBPANCESTOR),
@@ -40,26 +53,22 @@ goAncestors <- c(
   as.list(GOMFANCESTOR)
 )
 # Define the Root nodes
-rootGO <- c("all", BP = "GO:0008150", CC = "GO:0005575", MF = "GO:0003674")
-
-# Collect all the GO terms for each gene
-# gene2go with only accession no.
-nCores <- min(detectCores() - 1, 12)
-gene2GO <- go %>%
-  dplyr::filter(!is.na(`GO term accession`)) %>%
-  distinct(`Gene stable ID`,  `GO term accession`) %>%
-  split(f = .$`Gene stable ID`) %>% 
-  lapply(function(x){x[["GO term accession"]]}) %>%
-  mclapply(function(x){
-    unlist(goAncestors[x]) %>% 
-      unique() %>%
-      setdiff(rootGO)
-  }, mc.cores = nCores)
+rootGO <- list(
+  BP = "GO:0008150",
+  CC = "GO:0005575",
+  MF = "GO:0003674"
+)
+gene2GO %<>% mclapply(function(x){
+  unlist(goAncestors[x]) %>% # this expand each go along back to "all" node, but start with 1 step upper level
+    unique %>%
+    c(x) %>% # add the original gene2go for the gene
+    setdiff(unlist(rootGO)) %>% # remove the very top level but give free level yo choose with additional info in goSummaries
+    setdiff("all") %>% 
+    unique
+}, mc.cores = nCores)
 # Remove any with no GO terms again
 gene2GO <- gene2GO[vapply(gene2GO, length, numeric(1)) > 0]
-
-
-# match the info we gathered from gene2go that bring in ancestors
+# prepare to check which gene(s) enrich to a given GO
 go2Gene <- lapply(names(gene2GO), function(x){
   tibble(GeneID = x,
          GO = gene2GO[x] %>% unlist())
@@ -69,58 +78,136 @@ go2Gene <- lapply(names(gene2GO), function(x){
   lapply(function(x){
     x[["GeneID"]]
   }) 
-
-# add extra info for later filtering the GO path, by default shortest path should >= 4
 goSummaries <- url("https://uofabioinformaticshub.github.io/summaries2GO/data/goSummaries.RDS") %>%
   readRDS()
 ```
 
-```{r prepare everything for go fisher exact test}
+```{r DEgene to collect go}
 #---------input DE gene----------#
-genes <- DGEs$gad1CS
-genes$GeneID %>%
-   length()
-genes$GeneID %>%
-  intersect(names(gene2GO)) %>% length()
+DGEs %>% 
+  lapply(function(de){
+    tibble(n.de = length(de$GeneID),
+           n.deWithGO = intersect(de$GeneID, names(gene2GO)) %>% length())
+  })
 #--------------------------------#
 
-All_GO <- lapply(unique(genes$expression), function(r){
-  data <- genes %>% filter(expression == r)
-  gene.list <- data$geneID %>% intersect(names(gene2GO))
-  notDE <- setdiff(names(gene2GO), gene.list)
-  allGO <- gene2GO %>% unlist() %>% unique() 
-  nDE <- length(gene.list)
-  nNotDE <- length(notDE) 
-  allGO %>% 
-    mclapply(function(x){
-      # Count the DE genes with a given GO term
-      a <- sum(vapply(gene2GO[gene.list], function(id){x %in% id}, logical(1)))
-      # Count the notDE genes with a given GO term
-      b <- sum(vapply(gene2GO[notDE], function(id){x %in% id}, logical(1)))
-      mat <- c(a, b, nDE - a, nNotDE - b) %>%
-        matrix(nrow = 2) %>%
-        set_colnames(c("withGO", "withoutGO")) %>%
-        set_rownames(c("DE", "notDE"))
-      ft <- fisher.test(mat)
-      tibble(
-        ID = x,
-        N = sum(mat[,"withGO"]),
-        N.DE = mat["DE", "withGO"],
-        Expected = nDE * mat["notDE", "withGO"] / nNotDE, # expected number of DE genes in set of interested  
-        p = ft$p.value,
-        OR = ft$estimate
-      )
-    }, mc.cores = nCores) %>%
-    bind_rows() %>%
-    mutate(
-      adjP = p.adjust(p, "bonferroni"),
-      FDR = p.adjust(p, "fdr")
-    ) %>%
-    left_join(goSummaries, by = c("ID" = "id")) %>%
-    arrange(p) %>%
-    mutate(Term = Term(ID),
-           regulation = r) %>% 
-    dplyr::select(ID,Term,N.DE,Expected,N,everything())
-}) %>% bind_rows()
+goRes <- DGEs %>% 
+  lapply(function(treatDE){
+    treatDE %>% 
+      split(f = .$expression) %>% 
+      lapply(function(de){
+        DEgenes <- de$GeneID %>% intersect(names(gene2GO))
+        deGenes2GO <- gene2GO[DEgenes]
+        notDEGenes2GO <- gene2GO[setdiff(names(gene2GO), DEgenes)] 
+        # genome wild protein coding gene except genes in the DEgenes as background
+        nDE <- length(deGenes2GO)
+        nNotDE <- length(notDEGenes2GO)
+        
+        NotdeGO <- unlist(notDEGenes2GO) %>% 
+          table %>%
+          as.data.frame() %>%
+          set_names(c("GO_term", "notDECount")) 
+        
+        deGO <- unlist(deGenes2GO) %>% 
+          table %>%
+          as.data.frame() %>%
+          set_names(c("GO_term", "DECount")) %>%
+          left_join(NotdeGO, by = "GO_term") %>%
+          as_tibble() %>%
+          filter(DECount > 1) %>% # filter de count more than 1 for each go terms
+          mutate(notDECount = ifelse(is.na(notDECount),0,notDECount)) %>% # avoid NA as a given GO associated gene all in DE 
+          arrange(GO_term) %>%
+          droplevels() 
+          
+        
+        deGO %>%
+          split(f = .$GO_term) %>%
+          # extract(127) %>%
+          lapply(function(df){
+            mat <- matrix(c(df$DECount[1], df$notDECount[1],
+                            nDE - df$DECount[1], nNotDE - df$notDECount[1]),
+                          nrow = 2) %>% 
+        set_colnames(c("Genes With GO Term", "Genes Without GO Term")) %>% 
+        set_rownames(c("Genes of Interest", "Control Genes"))
+            ft <- fisher.test(mat)
+            mutate(df, 
+                   N = sum(mat[,"Genes With GO Term"]),
+                   Expected = nDE * df$notDECount[1] / nNotDE,
+                   # number of de expected with proportion calculated in control set
+                   p = ft$p.value)
+          }) %>%
+          bind_rows() %>%
+          mutate(adjP = p.adjust(p, "bonferroni"),
+                 FDR = p.adjust(p, "BY"),
+                 Description = Term(as.character(GO_term)),
+                 expression = unique(de$expression)) %>%
+          arrange(p) %>%
+          left_join(goSummaries, by = c("GO_term" = "id")) %>%
+          filter(DECount > Expected) %>% # consider the t.test is two-sided
+          dplyr::select(GO_term, Description, DECount, Expected, N, everything())
+      }) %>% 
+      bind_rows()
+  })
+```
+
+```{r prepare go results}
+goRes_filter <- names(goRes) %>% 
+  lapply(function(x){
+    goRes[[x]] %>% 
+      mutate(Group = x) %>% 
+       dplyr::select(-notDECount)
+  }) %>% 
+  bind_rows() %>% 
+  split(.$expression) %>% 
+  lapply(function(x){
+    x %>% 
+      group_by(GO_term) %>% 
+      filter(any(adjP < 0.05 & shortest_path >= 4)) #%>% 
+      # filter(!(str_detect(Description,
+      #                     "development|morphogenesis|cardioblast|cardiocyte|muscle|heart|animal|determination| cell |synapse")))
+    # filter out animal organ related GO (not relevant)
+  }) 
+```
+
+```{r}
+# prepare p with direction
+goHeat <- goRes_filter %>%
+  bind_rows() %>% 
+  mutate(p = ifelse(adjP < 0.05, p, 1),
+             p = ifelse(expression == "Up",-log10(p), log10(p))) 
+paletteLength <- 100
+myBreaks <- c(seq(min(goHeat$p), 0, 
+                  length.out = ceiling(paletteLength/2) + 1), 
+              seq(max(goHeat$p)/paletteLength, max(goHeat$p), length.out=floor(paletteLength/2)))
+myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
+
+heatData <- goHeat %>% 
+      reshape2::dcast(GO_term + Description + expression + ontology ~ Group,
+                      value.var = "p") %>%
+      mutate_all(~replace(., is.na(.), 0))
+#--------------------------------#
+mapdata_all <- heatData  %>% 
+  dplyr::select(-GO_term,-Description,-expression,-ontology) %>% 
+  set_rownames(seq(1:length(.[[1]])))
+
+gad2_1245 <- heatData %>% 
+  dplyr::select(gad21,gad1245,gad1245_special,gad1SALK) %>% 
+  filter(gad21 != 0 | gad1245 != 0 | gad1245_special != 0 | gad1SALK != 0) %>% 
+  set_rownames(seq(1:length(.[[1]])))
+#--------------------------------#
+
+Annos <- heatData %>%
+  filter(gad21 != 0 | gad1245 != 0 | gad1245_special != 0 | gad1SALK != 0) %>% 
+  dplyr::select(ontology) %>% 
+  set_rownames(seq(1:length(.$ontology)))
+
+pheatmap::pheatmap(mat = gad2_1245,
+                   cluster_cols = FALSE,
+                   annotation_row = Annos,
+                   show_rownames = FALSE,
+                   breaks = myBreaks,
+                   color = myColor
+) 
+
 ```
 
