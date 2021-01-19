@@ -31,9 +31,10 @@ meta <- tibble(sample = colnames(geneCounts),
                group = paste(genotype, submergence, sep = "_") # this info will fill to 'group' as col name match 'group' pram in DGEList() and converting to a single factor Exp
 )
 
-# because I am only focus on genotype difference in control condition, Thus I only use data in control condition
+# because I am only focus on genotype difference in control condition with GABA defficient mutant, Thus I only use data in control condition with selected mutants
 meta %<>% 
   filter(submergence == "cont") %>%
+  # filter(!str_detect(genotype, "pop|OE")) %>% 
   select(-group, -submergence)
 geneCounts %<>% select(meta$sample)
 
@@ -87,8 +88,8 @@ myContrast <- makeContrasts(gad1CS = gad1CS - Col,
                             gad1SALK = gad1SALK - Col,
                             gad21 = gad21 - Col,
                             gad1245 = gad1245 - Col,
-                            gad2OEB33 = gad2OEB33 - Col,
-                            pop28 = pop28 - Col,
+                            # gad2OEB33 = gad2OEB33 - Col,
+                            # pop28 = pop28 - Col,
                             gad1245_special = gad1245 - (gad21 + Col)/2, 
                             # gad1245 diff compare to wt apart from the diff form gad21
                             levels = designMat)
