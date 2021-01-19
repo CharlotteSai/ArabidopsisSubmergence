@@ -197,7 +197,11 @@ gad2_1245 <- heatData %>%
 #--------------------------------#
 
 Annos <- heatData %>%
+<<<<<<< HEAD
   filter(gad21 != 0 | gad1245 != 0 | gad1245_special != 0 | gad1SALK != 0) %>%  # if gad2_1245
+=======
+  filter(gad21 != 0 | gad1245 != 0 | gad1245_special != 0 | gad1SALK != 0) %>% 
+>>>>>>> fe89a0ef0abe87533d27cc47c61c6023b7ab98bd
   dplyr::select(ontology) %>% 
   set_rownames(seq(1:length(.$ontology)))
 
