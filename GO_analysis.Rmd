@@ -36,6 +36,7 @@ go <- getBM(attributes=c("ensembl_gene_id","go_id"), mart=m) %>%
 # attach go terms to each gene
 gene2GO <- go %>%
   filter(!is.na(GO_terms)) %>%
+  filter(GO_terms != "") %>% # this somehow makes GO result in less...
   distinct(GeneID,GO_terms) %>% 
   split(f = .$GeneID) %>%
   mclapply(function(x){
@@ -84,6 +85,7 @@ goSummaries <- url("https://uofabioinformaticshub.github.io/summaries2GO/data/go
 
 ```{r DEgene to collect go}
 #---------input DE gene----------#
+load("~/Box/Bioinfo/ArabidopsisSubmergence/DGEs.RData")
 DGEs %>% 
   lapply(function(de){
     tibble(n.de = length(de$GeneID),
