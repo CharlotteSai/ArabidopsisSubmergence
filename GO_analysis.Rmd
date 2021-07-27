@@ -85,7 +85,7 @@ goSummaries <- url("https://uofabioinformaticshub.github.io/summaries2GO/data/go
 
 ```{r DEgene to collect go}
 #---------input DE gene----------#
-load("~/Box/Bioinfo/ArabidopsisSubmergence/DGEs.RData")
+# load("~/Box/Bioinfo/ArabidopsisSubmergence/DGEs.RData")
 DGEs %>% 
   lapply(function(de){
     tibble(n.de = length(de$GeneID),
@@ -164,10 +164,7 @@ goRes_filter <- names(goRes) %>%
   lapply(function(x){
     x %>% 
       group_by(GO_term) %>% 
-      filter(any(adjP < 0.05 & shortest_path >= 4)) #%>% 
-      # filter(!(str_detect(Description,
-      #                     "development|morphogenesis|cardioblast|cardiocyte|muscle|heart|animal|determination| cell |synapse")))
-    # filter out animal organ related GO (not relevant)
+      filter(any(adjP < 0.05 & shortest_path >= 4))
   }) 
 ```
 
@@ -183,32 +180,40 @@ myBreaks <- c(seq(min(goHeat$p), 0,
               seq(max(goHeat$p)/paletteLength, max(goHeat$p), length.out=floor(paletteLength/2)))
 myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
 
-heatData <- goHeat %>% 
-      reshape2::dcast(GO_term + Description + expression + ontology ~ Group,
+goHeat %<>% 
+  dplyr::select(GO_term,Description,expression,ontology,Group,p) %>% 
+  reshape2::dcast(GO_term + Description + Group + ontology ~ expression,
                       value.var = "p") %>%
-      mutate_all(~replace(., is.na(.), 0))
-#--------------------------------#
-mapdata_all <- heatData  %>% 
-  dplyr::select(-GO_term,-Description,-expression,-ontology) %>% 
-  set_rownames(seq(1:length(.[[1]])))
+  mutate_all(~replace(., is.na(.), 0)) %>%
+  mutate(Down = ifelse(Down == 0, Up, Down),
+         Up = ifelse(Up == 0, Down, Up)) %>% 
+  reshape2::melt(id.vars = c("GO_term", "Description","Group","ontology"),
+                 variable.name = "expression", 
+                 value.name = "-log10p") %>% 
+  reshape2::dcast(GO_term + Description + expression + ontology ~ Group,
+                  value.var = "-log10p") %>%
+  dplyr::select(-expression) %>% 
+  unique() %>% 
+  mutate_all(~replace(., is.na(.), 0))
 
-gad2_1245 <- heatData %>% 
-  dplyr::select(gad21,gad1245,gad1245_special,gad1SALK) %>% 
-  filter(gad21 != 0 | gad1245 != 0 | gad1245_special != 0 | gad1SALK != 0) %>% 
-  set_rownames(seq(1:length(.[[1]])))
-#--------------------------------#
+mapdata <- goHeat %>% 
+  dplyr::select(gad1SALK,gad21,gad1245,gad1245_special) %>% 
+  set_rownames(rownames(goHeat))
 
-Annos <- heatData %>%
-  filter(gad21 != 0 | gad1245 != 0 | gad1245_special != 0 | gad1SALK != 0) %>% # if use gad2_1245
+Annos <- goHeat %>% 
   dplyr::select(ontology) %>% 
-  set_rownames(seq(1:length(.$ontology)))
+  set_rownames(rownames(goHeat))
+GOnames <- goHeat$GO_term
+names(GOnames) <- rownames(goHeat)
 
-pheatmap::pheatmap(mat = gad2_1245,
+pheatmap::pheatmap(mat = mapdata,
                    cluster_cols = FALSE,
                    annotation_row = Annos,
-                   show_rownames = FALSE,
+                   # show_rownames = FALSE,
                    breaks = myBreaks,
-                   color = myColor
+                   color = myColor,
+                   labels_row = GOnames,
+                   angle_col = 45
 ) 
 
 ```

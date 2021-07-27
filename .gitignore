@@ -5,3 +5,14 @@
 *.csv
 1_FastQC
 *.RData
+*pptx
+*.pdf
+QCFiles
+*.fa
+*.fasta
+*.png
+*.gff3
+*.xml
+*.txt
+*.xlsx
+*.png

@@ -1,0 +1,201 @@
+---
+title: "KEGGanalysis"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(KEGGREST)
+library(tidyverse)
+library(magrittr)
+library(tibble)
+```
+based on some info from `https://ucdavis-bioinformatics-training.github.io/2018-June-RNA-Seq-Workshop/friday/enrichment.html`
+
+```{r pull Keeg info from database}
+# Pull all pathways
+pathways_list <- keggList("pathway", "ath")
+keggSummary <- tibble(
+  keggID = sub("path:", "", names(pathways_list)),
+  Description = str_remove(pathways_list, "- Arabidopsis thaliana \\(thale cress\\)")
+)
+# Pull all genes for each pathway
+pathway_codes <- sub("path:", "", names(pathways_list)) 
+pathway2gene <- sapply(pathway_codes,
+                        function(pwid){
+                          pw <- keggGet(pwid)
+                          if (is.null(pw[[1]]$GENE)) return(NA)
+                          pw2 <- pw[[1]]$GENE[c(TRUE,FALSE)] # may need to modify this to c(FALSE, TRUE) for other organisms
+                          pw2 <- unlist(lapply(strsplit(pw2, split = ";", fixed = T), 
+                                               function(x)x[1]))
+                          return(pw2)
+                        }
+) # 136
+
+gene2pathway <- lapply(names(pathway2gene), function(x){
+  tibble(
+    pathwayID = x,
+    Gene = pathway2gene[x] %>% unlist()
+  )
+}) %>% 
+  bind_rows() %>% 
+  na.omit() %>% 
+  distinct(pathwayID,Gene) %>% 
+  split(f = .$Gene) %>% 
+  lapply(function(x){
+    x[["pathwayID"]]
+  }) # 5114
+```
+
+```{r DEgenes to collect kegg}
+#---------input DE gene----------#
+# load("~/Box/Bioinfo/ArabidopsisSubmergence/DGEs.RData")
+DGEs %>% 
+  lapply(function(de){
+    tibble(n.de = length(de$GeneID),
+           n.deWithGO = intersect(de$GeneID, names(gene2pathway)) %>% length())
+  })
+#--------------------------------#
+# $gad1SALK
+# # A tibble: 1 × 2
+#    n.de n.deWithGO
+#   <int>      <int>
+# 1   659        132
+# 
+# $gad21
+# # A tibble: 1 × 2
+#    n.de n.deWithGO
+#   <int>      <int>
+# 1  1022        261
+# 
+# $gad1245
+# # A tibble: 1 × 2
+#    n.de n.deWithGO
+#   <int>      <int>
+# 1  1139        291
+# 
+# $gad1245_special
+# # A tibble: 1 × 2
+#    n.de n.deWithGO
+#   <int>      <int>
+# 1   175         43
+
+keggRes <- DGEs %>% 
+  lapply(function(des){
+    DEgenes <- des$GeneID %>% intersect(names(gene2pathway))
+    deGenes2kegg <- gene2pathway[DEgenes] 
+    notDEGenes2kegg <- gene2pathway[setdiff(names(gene2pathway), DEgenes)] 
+    # genome wild protein coding gene except genes in the DEgenes as background
+    nDE <- length(deGenes2kegg)
+    nNotDE <- length(notDEGenes2kegg)
+    
+    NotdeKEGG <- unlist(notDEGenes2kegg) %>% 
+      table %>%
+      as.data.frame() %>%
+      set_names(c("keggID", "notDECount"))
+    
+    deKEGG <- unlist(deGenes2kegg) %>% 
+      table %>%
+      as.data.frame() %>%
+      set_names(c("keggID", "DECount")) %>%
+      left_join(NotdeKEGG, by = "keggID") %>%
+      as_tibble() %>%
+      # filter(DECount > 1) %>% # filter de count more than 1 for each go terms
+      mutate(notDECount = ifelse(is.na(notDECount),0,notDECount)) %>% # avoid NA as a given GO associated gene all in DE 
+      arrange(keggID) %>%
+      droplevels() 
+    
+    deKEGG %>%
+      split(f = .$keggID) %>%
+      # extract(127) %>%
+      lapply(function(df){
+        mat <- matrix(c(df$DECount[1], df$notDECount[1],
+                        nDE - df$DECount[1], nNotDE - df$notDECount[1]),
+                      nrow = 2) %>%
+          set_colnames(c("Genes With GO Term", "Genes Without GO Term")) %>%
+          set_rownames(c("Genes of Interest", "Control Genes"))
+        ft <- fisher.test(mat)
+        mutate(df,
+               Expected = nDE * df$notDECount[1] / nNotDE,
+               # number of de expected with proportion calculated in control set
+               GeneRatio = paste0(DECount,"/", nDE),
+               BgRatio = paste0(df$notDECount[1], "/", nNotDE),
+               p = ft$p.value,
+               adjP = p.adjust(p, "bonferroni"),
+               FDR = p.adjust(p, "fdr")
+               )
+      }) %>%
+      bind_rows() %>%
+      left_join(keggSummary, by = "keggID") %>%
+      filter(DECount > Expected) %>%
+      dplyr::select(keggID, Description, DECount, Expected, everything())
+  })
+```
+
+```{r kegg heatmap}
+# prepare filtered data for heatmap
+keggResfilter <- names(keggRes) %>% 
+  lapply(function(x){
+    keggRes[[x]] %>% 
+      mutate(Group = x) %>% 
+      dplyr::select(-notDECount)
+  }) %>% 
+  bind_rows() %>% 
+  group_by(keggID) %>% 
+  filter(any(adjP <= 0.05)) %>% 
+  arrange(keggID)
+
+# kegg heatmap
+keggHeat <- keggResfilter %>%
+  mutate(
+    p = ifelse(
+      adjP <= 0.05, p, 1
+    ),
+    p = -log10(p)
+  ) %>% 
+  reshape2::dcast(keggID + Description ~ Group,
+                  value.var = "p") %>%
+  mutate_all(~replace(., is.na(.), 0))
+
+mapdata <- keggHeat %>% 
+  column_to_rownames("keggID") %>% 
+  dplyr::select(gad1SALK,gad21,gad1245,gad1245_special) 
+
+label <- keggHeat$Description 
+names(label) <- keggHeat$keggID
+
+# myColor <- colorspace::sequential_hcl(30, "Purples 2") %>% rev()
+myColor <- colorRampPalette(c("white", "#511B54"))(15)
+# myColor <- colorRampPalette(c("white", "#2C73D2"))(30)
+
+pheatmap::pheatmap(mat = mapdata,
+                   cluster_cols = FALSE,
+                   # labels_row = label,
+                   # show_rownames = FALSE,
+                   # breaks = myBreaks,
+                   color = myColor,
+                   angle_col = 45
+) -> KEGGheat
+
+# export
+# export::graph2office(x = KEGGheat, type = "ppt",
+#              file = "KEGG_Res.pptx", width = 6,
+#              aspectr = 1.4, append = TRUE)
+
+```
+
+```{r final results}
+# final kegg Results
+keggFinal <- keggResfilter%>% 
+  bind_rows() %>% 
+  filter(adjP <= 0.05) %>% 
+  split(f = .$Group)
+
+# all KOI are marked in my goodnotes
+```
+
