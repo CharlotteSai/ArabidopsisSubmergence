@@ -199,6 +199,13 @@ keggFinal <- keggResfilter %>%
   filter(adjP <= 0.05) %>% 
   split(f = .$Group)
 
+# names(keggRes) %>%
+#   lapply(function(x){
+#     keggRes[[x]] %>%
+#       mutate(Group = paste0(x,"-Col-0"))
+#   }) %>%
+#   bind_rows() %>%
+#   write_csv("./output_results/KeggResults.csv")
 ```
 
 ```{r kegg heatmap interpertation}

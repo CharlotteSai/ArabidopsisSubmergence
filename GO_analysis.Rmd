@@ -277,6 +277,15 @@ goFinal <- goRes_filter %>%
   bind_rows() %>% 
   filter(adjP <= 0.05) %>%
   split(f = .$Group)
+
+# names(goRes) %>%
+#   lapply(function(x){
+#     goRes[[x]] %>%
+#       mutate(Group = paste0(x,"-Col-0"))
+#   }) %>%
+#   bind_rows() %>% 
+#   write_csv("./output_results/GoResults.csv")
+
 ```
 
 ```{r direct related GO to gad1245-gad2}

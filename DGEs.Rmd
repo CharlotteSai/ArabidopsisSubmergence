@@ -264,6 +264,10 @@ lapply(str_subset(names(deRes), "gad21|gad1245"), function(g){
   as.data.frame() %>% 
   vennDiagram(circle.col=c("turquoise", "salmon","slateblue"))
 
+# deRes %>%
+#   bind_rows() %>%head()
+#   write_csv("./output_results/DGEList.csv")
+
 # save.image("~/Box/Bioinfo/ArabidopsisSubmergence/DGEs.RData")
 ```
 
