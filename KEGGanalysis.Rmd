@@ -16,8 +16,15 @@ library(magrittr)
 library(tibble)
 library(pathview)
 ```
-based on some info from `https://ucdavis-bioinformatics-training.github.io/2018-June-RNA-Seq-Workshop/friday/enrichment.html`
 
+```{r function initailization}
+extractorRData <- function(file, object){
+  E <- new.env()
+  load(file=file, envir=E)
+  return(get(object, envir=E, inherits=F))
+}
+```
+based on some info from `https://ucdavis-bioinformatics-training.github.io/2018-June-RNA-Seq-Workshop/friday/enrichment.html`
 ```{r pull Keeg info from database}
 # Pull all pathways
 pathways_list <- keggList("pathway", "ath")
@@ -55,7 +62,8 @@ gene2pathway <- lapply(names(pathway2gene), function(x){
 
 ```{r DEgenes to collect kegg}
 #---------input DE gene----------#
-# load("~/Box/Bioinfo/ArabidopsisSubmergence/DGEs.RData")
+DGEs  <- extractorRData("./DGEs.RData", "DGEs")
+
 DGEs %>% 
   lapply(function(de){
     tibble(n.de = length(de$GeneID),
@@ -79,12 +87,6 @@ DGEs %>%
 #    n.de n.deWithGO
 #   <int>      <int>
 # 1  1139        291
-# 
-# $gad1245_special
-# # A tibble: 1 × 2
-#    n.de n.deWithGO
-#   <int>      <int>
-# 1   175         43
 
 keggRes <- DGEs %>% 
   extract(1:3) %>%
@@ -107,7 +109,7 @@ keggRes <- DGEs %>%
       set_names(c("keggID", "DECount")) %>%
       left_join(NotdeKEGG, by = "keggID") %>%
       as_tibble() %>%
-      # filter(DECount > 1) %>% # filter de count more than 1 for each go terms
+      filter(DECount > 1) %>% # filter de count more than 1 for each go terms
       mutate(notDECount = ifelse(is.na(notDECount),0,notDECount)) %>% # avoid NA as a given GO associated gene all in DE 
       arrange(keggID) %>%
       droplevels() 
@@ -197,7 +199,6 @@ keggFinal <- keggResfilter %>%
   filter(adjP <= 0.05) %>% 
   split(f = .$Group)
 
-# all KOI are marked in my goodnotes
 ```
 
 ```{r kegg heatmap interpertation}
@@ -207,16 +208,10 @@ shared <- mapdata %>%
   arrange(gad1245,gad21, gad1SALK) %>% 
   rownames()
 
-keggColor <- KEGGheat[["gtable"]][["grobs"]][[2]][["children"]][["GRID.rect.102"]][["gp"]][["fill"]]
-keggColor %<>% 
-  as.data.frame %>% 
-  rownames_to_column("keggID")
-
 keggResfilter %>% 
   filter(keggID %in% shared) %>% 
   select(Description,keggID) %>%
   unique() %>% 
-  left_join(keggColor, by = "keggID") %>%
   mutate(Class = keggGet(keggID)[[1]]$CLASS) %>% 
   dplyr::select(Class, everything()) %>% 
   arrange(Class) #%>% 
@@ -242,15 +237,9 @@ keggResfilter %>%
   arrange(desc(Class)) #%>% 
   # write_csv("kegg2Col-0unique.csv")
 
-# # gad1245_special
-# keggFinal$gad1245_special %>% 
-#   select(Description,keggID) %>%
-#   mutate(Class = keggGet(keggID)[[1]]$CLASS) %>% 
-#   left_join(keggColor, by = "keggID") %>% 
-#   write_csv("kegg2gad1245Special.csv")
 ```
 
-```{r ath04016}
+```{r mapk}
 mapk_exp <- DGEs %>%
   lapply(function(de){
     de %>% 
@@ -275,42 +264,11 @@ pathview(gene.data = mapk_exp,
          high = list(gene = "gray"),
          limit= list(gene = c(-10,0)),
          bins = list(gene = 11),
-         kegg.dir = "~/Box/Bioinfo/ArabidopsisSubmergence/pathview",
          kegg.native = TRUE,
          width = 70)
 ```
 
-```{r}
-ath04075Exp <- DGEs %>%
-  lapply(function(de){
-    de %>% 
-      filter(GeneID %in% 
-               intersect(pathway2gene$ath04075,
-                         de$GeneID)) %>% 
-      select(GeneID, logFC, comparison)
-  }) %>% 
-  bind_rows() %>% 
-  reshape2::dcast(GeneID ~ comparison,
-                  value.var = "logFC") %>% 
-  select(GeneID,gad1SALK, gad21,gad1245) %>% 
-  column_to_rownames("GeneID")
-
-pathview(gene.data = ath04075Exp, 
-         gene.idtype = "KEGG",
-         pathway.id = "04075", 
-         species = "ath",
-         na.col="transparent",
-         both.dirs = TRUE,
-         low = list(gene = "blue"),
-         mid = list(gene = "gray"),
-         high = list(gene = "red"),
-         limit= list(gene = 6),
-         bins = list(gene = 12),
-         kegg.dir = "~/Box/Bioinfo/ArabidopsisSubmergence/pathview",
-         kegg.native = TRUE)
-```
-
-```{r}
+```{r Circadian rhythm}
 ath04712Exp <- DGEs %>%
   lapply(function(de){
     de %>% 
@@ -336,11 +294,10 @@ pathview(gene.data = ath04712Exp,
          high = list(gene = "red"),
          limit= list(gene = 5),
          bins = list(gene = 12),
-         kegg.dir = "~/Box/Bioinfo/ArabidopsisSubmergence/pathview",
          kegg.native = TRUE)
 ```
 
-```{r}
+```{r  Starch and sucrose metabolism}
 ath00500Exp <- DGEs %>%
   lapply(function(de){
     de %>% 
@@ -374,7 +331,6 @@ pathview(gene.data = ath00500Exp,
          high = list(gene = "red"),
          limit= list(gene = 8),
          bins = list(gene = 12),
-         kegg.dir = "~/Box/Bioinfo/ArabidopsisSubmergence/pathview",
          kegg.native = TRUE,
          # map.symbol=TRUE,
          same.layer = TRUE)

@@ -93,14 +93,9 @@ fit <- glmQLFit(counts_Disp, design = designMat)
 
 # make contrast easy to follow
 myContrast <- makeContrasts(
-  # gad1CS = gad1CS - Col,
   gad1SALK = gad1SALK - Col,
   gad21 = gad21 - Col,
   gad1245 = gad1245 - Col,
-  # gad2OEB33 = gad2OEB33 - Col,
-  # pop28 = pop28 - Col,
-  # gad1245_special = gad1245 - (gad21 + Col)/2, 
-  # gad1245 diff compare to wt apart from the diff form gad21
   gad1245_gad2 = gad1245 - gad21,
   levels = designMat
   )
@@ -114,9 +109,6 @@ deRes <- lapply(colnames(myContrast), function(i){
   rownames_to_column("GeneID") %>% 
   mutate(adj.p = p.adjust(PValue, method = "BH"),
          comparison = i
-         # comparison = ifelse(i != "gad1245_special",
-         #                     paste0(i,"-wt"),
-         #                     i)
          )
 })
 names(deRes) <- colnames(myContrast)
@@ -167,8 +159,7 @@ deRes %>%
          expression = fct_relevel(expression, "Up","Stable","Down"),
          comparison = factor(comparison, 
                              levels = c("gad1SALK","gad21",
-                                        "gad1245","gad1245_special",
-                                        "gad1245_gad2"))) %>%
+                                        "gad1245","gad1245_gad2"))) %>%
   ggplot(aes(x = logFC, 
              y = -log10(adj.p), 
              colour = expression)) +
@@ -247,11 +238,10 @@ deRes %>% lapply(function(g){
     dplyr::select(sig) %>%
     set_names(unique(g$comparison))
 }) %>% 
-  as.data.frame() %>% 
+  as.data.frame() %>%
   vennDiagram()
 
 ```
-
 
 ```{r prepare DGEs for GO}
 # the filtering applied with both adj.p and logFC
@@ -262,7 +252,7 @@ DGEs <- lapply(names(deRes), function(i){
 })
 names(DGEs) <- names(deRes)
 
-# see overlap between gad21, gad1245 and gad1245 special
+# see overlap between gad21, gad1245 and gad1245_gad2
 lapply(str_subset(names(deRes), "gad21|gad1245"), function(g){
   deRes[[g]] %>% 
   mutate(sig = ifelse(adj.p <= 0.05 & abs(logFC) >= 1, 
@@ -277,8 +267,8 @@ lapply(str_subset(names(deRes), "gad21|gad1245"), function(g){
 # save.image("~/Box/Bioinfo/ArabidopsisSubmergence/DGEs.RData")
 ```
 
-```{r}
-lt <- list(gad1245_avecol0_gad2 = DGEs$gad1245_special$GeneID,
+```{r upset plot}
+lt <- list(gad1_Col0 = DGEs$gad1SALK$GeneID,
            gad1245_gad2 = DGEs$gad1245_gad2$GeneID,
            gad21_Col0 = DGEs$gad21$GeneID,
            gad1245_Col0 = DGEs$gad1245$GeneID
