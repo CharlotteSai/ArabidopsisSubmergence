@@ -1,0 +1,71 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	fastqc_trimmed
+	1
+
+[Thu Dec 12 12:19:46 2019]
+rule fastqc_trimmed:
+    input: ../2_trimmed/pop28-cont-rep3_Trimmed.fastq.gz
+    output: ../1_FastQC/Trimmed/pop28-cont-rep3_Trimmed_fastqc.zip, ../1_FastQC/Trimmed/pop28-cont-rep3_Trimmed_fastqc.html
+    jobid: 0
+    wildcards: prefix=pop28-cont-rep3
+
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+Activating conda environment: /fast/users/a1673472/PEB_Arabidopsis_RNASeq/At_GABA_mutants_ying_Aug2019/snakemake/.snakemake/conda/97b9ebeb
+Started analysis of pop28-cont-rep3_Trimmed.fastq.gz
+Approx 5% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 10% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 15% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 20% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 25% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 30% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 35% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 40% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 45% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 50% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 55% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 60% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 65% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 70% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 75% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 80% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 85% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 90% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Approx 95% complete for pop28-cont-rep3_Trimmed.fastq.gz
+Analysis complete for pop28-cont-rep3_Trimmed.fastq.gz
+[Thu Dec 12 12:22:00 2019]
+Finished job 0.
+1 of 1 steps (100%) done
+
+===========================================================================
+Phoenix Job Utilisation Reporting
+===========================================================================
+Job Name            : fastqc_trimmed
+Job ID              : 20799160
+User                : a1673472
+Account             : waite
+Cluster             : phoenix
+Partition           : cpu
+Nodes (List)        : 1 (r1n36)
+Cores               : 1
+GPUs                : 0
+State               : COMPLETED
+Submit              : 2019-12-12T12:19:42
+Start               : 2019-12-12T12:19:42
+End                 : 2019-12-12T12:22:00
+Walltime reserved   : 03:00:00
+Walltime elapsed (%): 00:02:18  ( 1.3% * reserved)
+CPU-time elapsed    : 0.04 core-hours
+% CPU used (Total)  : 89.16%    (0.03 core-hours)
+% User CPU (Compute): 85.72%    (0.03 core-hours)
+% System CPU (I/O)  :  3.44%    (0.00 core-hours)
+Mem reserved        : 500M/node
+% Mem used (Max)    : 42.14%    (210.72M/node) 
+Max Disk Write      : 20.48K    (r1n36)
+Max Disk Read       : 812.94M   (r1n36)
+===========================================================================

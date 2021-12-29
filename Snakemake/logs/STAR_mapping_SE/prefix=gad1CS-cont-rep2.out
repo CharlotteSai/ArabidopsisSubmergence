@@ -1,0 +1,66 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	STAR_mapping_SE
+	1
+
+[Fri Dec 20 16:38:57 2019]
+rule STAR_mapping_SE:
+    input: ../2_trimmed/gad1CS-cont-rep2_Trimmed.fastq.gz, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/chrLength.txt, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/chrNameLength.txt, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/chrName.txt, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/chrStart.txt, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/SA, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/SAindex, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/Genome, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/genomeParameters.txt
+    output: ../3_BAM/gad1CS-cont-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1CS-cont-rep2.SJ.out.tab
+    log: ../3_BAM/log_files/gad1CS-cont-rep2.Log.out, ../3_BAM/log_files/gad1CS-cont-rep2.Log.progress.out, ../3_BAM/log_files/gad1CS-cont-rep2.Log.final.out, ../3_BAM/log_files/gad1CS-cont-rep2.Log.std.out
+    jobid: 0
+    wildcards: prefix=gad1CS-cont-rep2
+    threads: 8
+
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+Activating conda environment: /fast/users/a1673472/PEB_Arabidopsis_RNASeq/At_GABA_mutants_ying_Aug2019/snakemake/.snakemake/conda/08dd902b
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:2:13107:16942:5572': '72N2' -> '72M2'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:1:22104:4456:20056': '55N20' -> '55M20'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:1:23202:7138:15940': '55N20' -> '55M20'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:1:22201:2362:2492': '46N29' -> '46M29'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:4:13404:22491:14624': '18N57' -> '18M57'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:4:12510:15478:6155': '10N65' -> '10M65'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:1:21206:26335:11253': '7N68' -> '7M68'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:3:22601:10084:7105': '7N68' -> '7M68'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:1:22301:17436:4013': '4N71' -> '4M71'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:3:11411:7820:8885': '4N71' -> '4M71'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:4:13405:17119:4606': '4N71' -> '4M71'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:2:21109:19370:2298': '3N72' -> '3M72'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:1:23212:11839:16745': '2N72' -> '2M72'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:2:22207:2320:11457': '1N72' -> '1M72'
+[Fri Dec 20 16:56:54 2019]
+Finished job 0.
+1 of 1 steps (100%) done
+
+===========================================================================
+Phoenix Job Utilisation Reporting
+===========================================================================
+Job Name            : STAR_mapping_SE
+Job ID              : 20972786
+User                : a1673472
+Account             : waite
+Cluster             : phoenix
+Partition           : batch
+Nodes (List)        : 1 (r4n08)
+Cores               : 8
+GPUs                : 0
+State               : COMPLETED
+Submit              : 2019-12-20T16:38:29
+Start               : 2019-12-20T16:38:55
+End                 : 2019-12-20T16:56:54
+Walltime reserved   : 01:00:00
+Walltime elapsed (%): 00:17:59  (30.0% * reserved)
+CPU-time elapsed    : 2.40 core-hours
+% CPU used (Total)  :  8.36%    (0.20 core-hours)
+% User CPU (Compute):  7.84%    (0.19 core-hours)
+% System CPU (I/O)  :  0.51%    (0.01 core-hours)
+Mem reserved        : 4G/node
+% Mem used (Max)    : 65.64%    (2.63G/node) 
+Max Disk Write      : 16.74G    (r4n08)
+Max Disk Read       : 17.07G    (r4n08)
+===========================================================================

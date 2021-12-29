@@ -1,0 +1,61 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	Trimmatic
+	1
+
+[Tue Dec 10 17:26:04 2019]
+rule Trimmatic:
+    input: ../0_fastq/submergence_batch1/gad21-cont-rep2.fastq.gz, misc/trimmomatic_adapters/TruSeq3-SE.fa
+    output: ../2_trimmed/gad21-cont-rep2_Trimmed.fastq.gz
+    jobid: 0
+    wildcards: prefix=gad21-cont-rep2
+
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+Activating conda environment: /fast/users/a1673472/PEB_Arabidopsis_RNASeq/At_GABA_mutants_ying_Aug2019/snakemake/.snakemake/conda/55a1a123
+TrimmomaticSE: Started with arguments:
+ -threads 1 ../0_fastq/submergence_batch1/gad21-cont-rep2.fastq.gz ../2_trimmed/gad21-cont-rep2_Trimmed.fastq.gz ILLUMINACLIP:misc/trimmomatic_adapters/TruSeq3-SE.fa:2:30:10:3:true LEADING:2 TRAILING:2 SLIDINGWINDOW:4:15 MINLEN:70
+Using Long Clipping Sequence: 'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA'
+Using Long Clipping Sequence: 'AGATCGGAAGAGCGGTTCAGCAGGAATGCCGAG'
+Using Long Clipping Sequence: 'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC'
+Using Long Clipping Sequence: 'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT'
+Using Long Clipping Sequence: 'AGATCGGAAGAGCTCGTATGCCGTCTTCTGCTTG'
+ILLUMINACLIP: Using 0 prefix pairs, 5 forward/reverse sequences, 0 forward only sequences, 0 reverse only sequences
+Quality encoding detected as phred33
+Input Reads: 19811687 Surviving: 19256811 (97.20%) Dropped: 554876 (2.80%)
+TrimmomaticSE: Completed successfully
+[Tue Dec 10 17:36:57 2019]
+Finished job 0.
+1 of 1 steps (100%) done
+
+===========================================================================
+Phoenix Job Utilisation Reporting
+===========================================================================
+Job Name            : Trimmatic
+Job ID              : 20772683
+User                : a1673472
+Account             : waite
+Cluster             : phoenix
+Partition           : cpu
+Nodes (List)        : 1 (r1n29)
+Cores               : 1
+GPUs                : 0
+State               : COMPLETED
+Submit              : 2019-12-10T17:25:42
+Start               : 2019-12-10T17:25:48
+End                 : 2019-12-10T17:36:57
+Walltime reserved   : 07:00:00
+Walltime elapsed (%): 00:11:09  ( 2.7% * reserved)
+CPU-time elapsed    : 0.19 core-hours
+% CPU used (Total)  : 95.89%    (0.18 core-hours)
+% User CPU (Compute): 91.86%    (0.17 core-hours)
+% System CPU (I/O)  :  4.03%    (0.01 core-hours)
+Mem reserved        : 100M/node
+% Mem used (Max)    : 226.73%    (226.73M/node) 
+Max Disk Write      : 813.65M   (r1n29)
+Max Disk Read       : 969.58M   (r1n29)
+===========================================================================

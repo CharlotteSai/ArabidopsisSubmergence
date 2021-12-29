@@ -1,0 +1,71 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	fastqc_trimmed
+	1
+
+[Thu Dec 12 12:19:53 2019]
+rule fastqc_trimmed:
+    input: ../2_trimmed/gad2OEB33-cont-rep1_Trimmed.fastq.gz
+    output: ../1_FastQC/Trimmed/gad2OEB33-cont-rep1_Trimmed_fastqc.zip, ../1_FastQC/Trimmed/gad2OEB33-cont-rep1_Trimmed_fastqc.html
+    jobid: 0
+    wildcards: prefix=gad2OEB33-cont-rep1
+
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+Activating conda environment: /fast/users/a1673472/PEB_Arabidopsis_RNASeq/At_GABA_mutants_ying_Aug2019/snakemake/.snakemake/conda/97b9ebeb
+Started analysis of gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 5% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 10% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 15% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 20% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 25% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 30% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 35% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 40% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 45% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 50% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 55% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 60% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 65% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 70% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 75% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 80% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 85% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 90% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Approx 95% complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+Analysis complete for gad2OEB33-cont-rep1_Trimmed.fastq.gz
+[Thu Dec 12 12:23:17 2019]
+Finished job 0.
+1 of 1 steps (100%) done
+
+===========================================================================
+Phoenix Job Utilisation Reporting
+===========================================================================
+Job Name            : fastqc_trimmed
+Job ID              : 20799180
+User                : a1673472
+Account             : waite
+Cluster             : phoenix
+Partition           : cpu
+Nodes (List)        : 1 (r3n09)
+Cores               : 1
+GPUs                : 0
+State               : COMPLETED
+Submit              : 2019-12-12T12:19:46
+Start               : 2019-12-12T12:19:48
+End                 : 2019-12-12T12:23:17
+Walltime reserved   : 03:00:00
+Walltime elapsed (%): 00:03:29  ( 1.9% * reserved)
+CPU-time elapsed    : 0.06 core-hours
+% CPU used (Total)  : 96.13%    (0.06 core-hours)
+% User CPU (Compute): 93.05%    (0.05 core-hours)
+% System CPU (I/O)  :  3.08%    (0.00 core-hours)
+Mem reserved        : 500M/node
+% Mem used (Max)    : 43.43%    (217.13M/node) 
+Max Disk Write      : 20.48K    (r3n09)
+Max Disk Read       : 1.04G     (r3n09)
+===========================================================================

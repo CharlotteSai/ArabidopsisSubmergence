@@ -1,0 +1,425 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	FeatureCounts_gene
+	1
+
+[Thu Jan 16 14:14:50 2020]
+rule FeatureCounts_gene:
+    input: ../3_BAM/pop28-sub-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/Col-cont-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1CS-cont-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/pop28-cont-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1SALK-sub-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/Col-sub-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1245-cont-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/pop28-cont-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad2OEB33-sub-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1CS-cont-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/pop28-sub-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1CS-sub-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1CS-sub-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/pop28-cont-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1245-cont-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1CS-sub-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/Col-cont-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/Col-cont-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1SALK-cont-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad2OEB33-sub-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1245-sub-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1SALK-sub-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad21-cont-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad2OEB33-sub-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad21-sub-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/Col-sub-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1245-sub-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1245-sub-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad2OEB33-cont-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1SALK-cont-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad2OEB33-cont-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1SALK-cont-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/pop28-sub-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad21-cont-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1CS-cont-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1SALK-sub-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad21-sub-rep2.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad21-sub-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/Col-sub-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad21-cont-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1245-cont-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad2OEB33-cont-rep1.STARAligned_TAIR10.sortedByCoord.bam, ../At_genome/Araport11_GFF3_genes_transposons.201606_noChr.gtf
+    output: ../4_Counts/Ying_Submergence_batch1.txt, ../4_Counts/Ying_Submergence_batch1_final.txt, ../4_Counts/Ying_Submergence_batch1.txt.summary
+    jobid: 0
+
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+Activating conda environment: /fast/users/a1673472/PEB_Arabidopsis_RNASeq/At_GABA_mutants_ying_Aug2019/snakemake/.snakemake/conda/e1cce812
+
+        ==========     _____ _    _ ____  _____  ______          _____  
+        =====         / ____| |  | |  _ \|  __ \|  ____|   /\   |  __ \ 
+          =====      | (___ | |  | | |_) | |__) | |__     /  \  | |  | |
+            ====      \___ \| |  | |  _ <|  _  /|  __|   / /\ \ | |  | |
+              ====    ____) | |__| | |_) | | \ \| |____ / ____ \| |__| |
+        ==========   |_____/ \____/|____/|_|  \_\______/_/    \_\_____/
+	  v1.6.4
+
+//========================== featureCounts setting ===========================\\
+||                                                                            ||
+||             Input files : 42 BAM files                                     ||
+||                           S pop28-sub-rep1.STARAligned_TAIR10.sortedBy ... ||
+||                           S Col-cont-rep1.STARAligned_TAIR10.sortedByC ... ||
+||                           S gad1CS-cont-rep2.STARAligned_TAIR10.sorted ... ||
+||                           S pop28-cont-rep1.STARAligned_TAIR10.sortedB ... ||
+||                           S gad1SALK-sub-rep2.STARAligned_TAIR10.sorte ... ||
+||                           S Col-sub-rep2.STARAligned_TAIR10.sortedByCo ... ||
+||                           S gad1245-cont-rep2.STARAligned_TAIR10.sorte ... ||
+||                           S pop28-cont-rep3.STARAligned_TAIR10.sortedB ... ||
+||                           S gad2OEB33-sub-rep1.STARAligned_TAIR10.sort ... ||
+||                           S gad1CS-cont-rep3.STARAligned_TAIR10.sorted ... ||
+||                           S pop28-sub-rep2.STARAligned_TAIR10.sortedBy ... ||
+||                           S gad1CS-sub-rep2.STARAligned_TAIR10.sortedB ... ||
+||                           S gad1CS-sub-rep3.STARAligned_TAIR10.sortedB ... ||
+||                           S pop28-cont-rep2.STARAligned_TAIR10.sortedB ... ||
+||                           S gad1245-cont-rep1.STARAligned_TAIR10.sorte ... ||
+||                           S gad1CS-sub-rep1.STARAligned_TAIR10.sortedB ... ||
+||                           S Col-cont-rep3.STARAligned_TAIR10.sortedByC ... ||
+||                           S Col-cont-rep2.STARAligned_TAIR10.sortedByC ... ||
+||                           S gad1SALK-cont-rep3.STARAligned_TAIR10.sort ... ||
+||                           S gad2OEB33-sub-rep2.STARAligned_TAIR10.sort ... ||
+||                           S gad1245-sub-rep2.STARAligned_TAIR10.sorted ... ||
+||                           S gad1SALK-sub-rep3.STARAligned_TAIR10.sorte ... ||
+||                           S gad21-cont-rep1.STARAligned_TAIR10.sortedB ... ||
+||                           S gad2OEB33-sub-rep3.STARAligned_TAIR10.sort ... ||
+||                           S gad21-sub-rep3.STARAligned_TAIR10.sortedBy ... ||
+||                           S Col-sub-rep1.STARAligned_TAIR10.sortedByCo ... ||
+||                           S gad1245-sub-rep3.STARAligned_TAIR10.sorted ... ||
+||                           S gad1245-sub-rep1.STARAligned_TAIR10.sorted ... ||
+||                           S gad2OEB33-cont-rep3.STARAligned_TAIR10.sor ... ||
+||                           S gad1SALK-cont-rep2.STARAligned_TAIR10.sort ... ||
+||                           S gad2OEB33-cont-rep2.STARAligned_TAIR10.sor ... ||
+||                           S gad1SALK-cont-rep1.STARAligned_TAIR10.sort ... ||
+||                           S pop28-sub-rep3.STARAligned_TAIR10.sortedBy ... ||
+||                           S gad21-cont-rep2.STARAligned_TAIR10.sortedB ... ||
+||                           S gad1CS-cont-rep1.STARAligned_TAIR10.sorted ... ||
+||                           S gad1SALK-sub-rep1.STARAligned_TAIR10.sorte ... ||
+||                           S gad21-sub-rep2.STARAligned_TAIR10.sortedBy ... ||
+||                           S gad21-sub-rep1.STARAligned_TAIR10.sortedBy ... ||
+||                           S Col-sub-rep3.STARAligned_TAIR10.sortedByCo ... ||
+||                           S gad21-cont-rep3.STARAligned_TAIR10.sortedB ... ||
+||                           S gad1245-cont-rep3.STARAligned_TAIR10.sorte ... ||
+||                           S gad2OEB33-cont-rep1.STARAligned_TAIR10.sor ... ||
+||                                                                            ||
+||             Output file : Ying_Submergence_batch1.txt                      ||
+||                 Summary : Ying_Submergence_batch1.txt.summary              ||
+||              Annotation : Araport11_GFF3_genes_transposons.201606_noCh ... ||
+||      Dir for temp files : ../4_Counts                                      ||
+||                                                                            ||
+||                 Threads : 4                                                ||
+||                   Level : meta-feature level                               ||
+||              Paired-end : no                                               ||
+||      Multimapping reads : not counted                                      ||
+|| Multi-overlapping reads : not counted                                      ||
+||   Min overlapping bases : 1                                                ||
+||                                                                            ||
+\\============================================================================//
+
+//================================= Running ==================================\\
+||                                                                            ||
+|| Load annotation file Araport11_GFF3_genes_transposons.201606_noChr.gtf ... ||
+||    Features : 322385                                                       ||
+||    Meta-features : 37336                                                   ||
+||    Chromosomes/contigs : 7                                                 ||
+||                                                                            ||
+|| Process BAM file pop28-sub-rep1.STARAligned_TAIR10.sortedByCoord.bam...    ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 21248767                                             ||
+||    Successfully assigned alignments : 19061657 (89.7%)                     ||
+||    Running time : 0.37 minutes                                             ||
+||                                                                            ||
+|| Process BAM file Col-cont-rep1.STARAligned_TAIR10.sortedByCoord.bam...     ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 21239153                                             ||
+||    Successfully assigned alignments : 18499756 (87.1%)                     ||
+||    Running time : 0.41 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1CS-cont-rep2.STARAligned_TAIR10.sortedByCoord.bam...  ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 25141546                                             ||
+||    Successfully assigned alignments : 22270839 (88.6%)                     ||
+||    Running time : 0.48 minutes                                             ||
+||                                                                            ||
+|| Process BAM file pop28-cont-rep1.STARAligned_TAIR10.sortedByCoord.bam...   ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 25576503                                             ||
+||    Successfully assigned alignments : 22784641 (89.1%)                     ||
+||    Running time : 0.47 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1SALK-sub-rep2.STARAligned_TAIR10.sortedByCoord.ba ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 21641294                                             ||
+||    Successfully assigned alignments : 18782311 (86.8%)                     ||
+||    Running time : 0.35 minutes                                             ||
+||                                                                            ||
+|| Process BAM file Col-sub-rep2.STARAligned_TAIR10.sortedByCoord.bam...      ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 19491215                                             ||
+||    Successfully assigned alignments : 17401340 (89.3%)                     ||
+||    Running time : 0.31 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1245-cont-rep2.STARAligned_TAIR10.sortedByCoord.ba ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 21700001                                             ||
+||    Successfully assigned alignments : 19137413 (88.2%)                     ||
+||    Running time : 0.39 minutes                                             ||
+||                                                                            ||
+|| Process BAM file pop28-cont-rep3.STARAligned_TAIR10.sortedByCoord.bam...   ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 20678568                                             ||
+||    Successfully assigned alignments : 18063462 (87.4%)                     ||
+||    Running time : 0.34 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad2OEB33-sub-rep1.STARAligned_TAIR10.sortedByCoord.b ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 22877507                                             ||
+||    Successfully assigned alignments : 20697709 (90.5%)                     ||
+||    Running time : 0.37 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1CS-cont-rep3.STARAligned_TAIR10.sortedByCoord.bam...  ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 19567714                                             ||
+||    Successfully assigned alignments : 17484645 (89.4%)                     ||
+||    Running time : 0.31 minutes                                             ||
+||                                                                            ||
+|| Process BAM file pop28-sub-rep2.STARAligned_TAIR10.sortedByCoord.bam...    ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 23347584                                             ||
+||    Successfully assigned alignments : 20592799 (88.2%)                     ||
+||    Running time : 0.38 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1CS-sub-rep2.STARAligned_TAIR10.sortedByCoord.bam...   ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 21618134                                             ||
+||    Successfully assigned alignments : 19294535 (89.3%)                     ||
+||    Running time : 0.36 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1CS-sub-rep3.STARAligned_TAIR10.sortedByCoord.bam...   ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 22766494                                             ||
+||    Successfully assigned alignments : 19978695 (87.8%)                     ||
+||    Running time : 0.37 minutes                                             ||
+||                                                                            ||
+|| Process BAM file pop28-cont-rep2.STARAligned_TAIR10.sortedByCoord.bam...   ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 20578634                                             ||
+||    Successfully assigned alignments : 18426558 (89.5%)                     ||
+||    Running time : 0.33 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1245-cont-rep1.STARAligned_TAIR10.sortedByCoord.ba ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 14727900                                             ||
+||    Successfully assigned alignments : 13198559 (89.6%)                     ||
+||    Running time : 0.24 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1CS-sub-rep1.STARAligned_TAIR10.sortedByCoord.bam...   ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 24306379                                             ||
+||    Successfully assigned alignments : 21521095 (88.5%)                     ||
+||    Running time : 0.39 minutes                                             ||
+||                                                                            ||
+|| Process BAM file Col-cont-rep3.STARAligned_TAIR10.sortedByCoord.bam...     ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 20283002                                             ||
+||    Successfully assigned alignments : 18550600 (91.5%)                     ||
+||    Running time : 0.33 minutes                                             ||
+||                                                                            ||
+|| Process BAM file Col-cont-rep2.STARAligned_TAIR10.sortedByCoord.bam...     ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 31729301                                             ||
+||    Successfully assigned alignments : 28514849 (89.9%)                     ||
+||    Running time : 0.50 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1SALK-cont-rep3.STARAligned_TAIR10.sortedByCoord.b ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 19442136                                             ||
+||    Successfully assigned alignments : 17231969 (88.6%)                     ||
+||    Running time : 0.31 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad2OEB33-sub-rep2.STARAligned_TAIR10.sortedByCoord.b ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 23151538                                             ||
+||    Successfully assigned alignments : 20766713 (89.7%)                     ||
+||    Running time : 0.37 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1245-sub-rep2.STARAligned_TAIR10.sortedByCoord.bam...  ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 24953376                                             ||
+||    Successfully assigned alignments : 22148118 (88.8%)                     ||
+||    Running time : 0.41 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1SALK-sub-rep3.STARAligned_TAIR10.sortedByCoord.ba ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 21527409                                             ||
+||    Successfully assigned alignments : 18959417 (88.1%)                     ||
+||    Running time : 0.35 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad21-cont-rep1.STARAligned_TAIR10.sortedByCoord.bam...   ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 21557104                                             ||
+||    Successfully assigned alignments : 18318396 (85.0%)                     ||
+||    Running time : 0.34 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad2OEB33-sub-rep3.STARAligned_TAIR10.sortedByCoord.b ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 21173432                                             ||
+||    Successfully assigned alignments : 18969287 (89.6%)                     ||
+||    Running time : 0.39 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad21-sub-rep3.STARAligned_TAIR10.sortedByCoord.bam...    ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 19644399                                             ||
+||    Successfully assigned alignments : 17588216 (89.5%)                     ||
+||    Running time : 0.39 minutes                                             ||
+||                                                                            ||
+|| Process BAM file Col-sub-rep1.STARAligned_TAIR10.sortedByCoord.bam...      ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 22785515                                             ||
+||    Successfully assigned alignments : 20390606 (89.5%)                     ||
+||    Running time : 0.45 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1245-sub-rep3.STARAligned_TAIR10.sortedByCoord.bam...  ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 21353746                                             ||
+||    Successfully assigned alignments : 19055644 (89.2%)                     ||
+||    Running time : 0.42 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1245-sub-rep1.STARAligned_TAIR10.sortedByCoord.bam...  ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 20107117                                             ||
+||    Successfully assigned alignments : 17969030 (89.4%)                     ||
+||    Running time : 0.37 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad2OEB33-cont-rep3.STARAligned_TAIR10.sortedByCoord. ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 21740729                                             ||
+||    Successfully assigned alignments : 19181713 (88.2%)                     ||
+||    Running time : 0.35 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1SALK-cont-rep2.STARAligned_TAIR10.sortedByCoord.b ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 16094576                                             ||
+||    Successfully assigned alignments : 14302483 (88.9%)                     ||
+||    Running time : 0.26 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad2OEB33-cont-rep2.STARAligned_TAIR10.sortedByCoord. ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 24413891                                             ||
+||    Successfully assigned alignments : 20561263 (84.2%)                     ||
+||    Running time : 0.39 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1SALK-cont-rep1.STARAligned_TAIR10.sortedByCoord.b ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 22810797                                             ||
+||    Successfully assigned alignments : 20275259 (88.9%)                     ||
+||    Running time : 0.37 minutes                                             ||
+||                                                                            ||
+|| Process BAM file pop28-sub-rep3.STARAligned_TAIR10.sortedByCoord.bam...    ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 20024214                                             ||
+||    Successfully assigned alignments : 17713804 (88.5%)                     ||
+||    Running time : 0.33 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad21-cont-rep2.STARAligned_TAIR10.sortedByCoord.bam...   ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 19103891                                             ||
+||    Successfully assigned alignments : 16731960 (87.6%)                     ||
+||    Running time : 0.31 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1CS-cont-rep1.STARAligned_TAIR10.sortedByCoord.bam...  ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 15310625                                             ||
+||    Successfully assigned alignments : 13679549 (89.3%)                     ||
+||    Running time : 0.25 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1SALK-sub-rep1.STARAligned_TAIR10.sortedByCoord.ba ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 21293323                                             ||
+||    Successfully assigned alignments : 18624506 (87.5%)                     ||
+||    Running time : 0.35 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad21-sub-rep2.STARAligned_TAIR10.sortedByCoord.bam...    ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 21615654                                             ||
+||    Successfully assigned alignments : 19282912 (89.2%)                     ||
+||    Running time : 0.35 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad21-sub-rep1.STARAligned_TAIR10.sortedByCoord.bam...    ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 19729585                                             ||
+||    Successfully assigned alignments : 17621323 (89.3%)                     ||
+||    Running time : 0.33 minutes                                             ||
+||                                                                            ||
+|| Process BAM file Col-sub-rep3.STARAligned_TAIR10.sortedByCoord.bam...      ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 28854282                                             ||
+||    Successfully assigned alignments : 24565897 (85.1%)                     ||
+||    Running time : 0.46 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad21-cont-rep3.STARAligned_TAIR10.sortedByCoord.bam...   ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 26482298                                             ||
+||    Successfully assigned alignments : 23458339 (88.6%)                     ||
+||    Running time : 0.42 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad1245-cont-rep3.STARAligned_TAIR10.sortedByCoord.ba ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 13365999                                             ||
+||    Successfully assigned alignments : 11938608 (89.3%)                     ||
+||    Running time : 0.22 minutes                                             ||
+||                                                                            ||
+|| Process BAM file gad2OEB33-cont-rep1.STARAligned_TAIR10.sortedByCoord. ... ||
+||    Single-end reads are included.                                          ||
+||    Assign alignments to features...                                        ||
+||    Total alignments : 28272663                                             ||
+||    Successfully assigned alignments : 24002518 (84.9%)                     ||
+||    Running time : 0.45 minutes                                             ||
+||                                                                            ||
+||                                                                            ||
+|| Summary of counting results can be found in file "../4_Counts/Ying_Submer  ||
+|| gence_batch1.txt.summary"                                                  ||
+||                                                                            ||
+\\============================================================================//
+
+[Thu Jan 16 14:30:16 2020]
+Finished job 0.
+1 of 1 steps (100%) done
+
+===========================================================================
+Phoenix Job Utilisation Reporting
+===========================================================================
+Job Name            : FeatureCounts_gene
+Job ID              : 21443127
+User                : a1673472
+Account             : waite
+Cluster             : phoenix
+Partition           : cpu
+Nodes (List)        : 1 (r2n20)
+Cores               : 1
+GPUs                : 0
+State               : COMPLETED
+Submit              : 2020-01-16T14:12:15
+Start               : 2020-01-16T14:14:46
+End                 : 2020-01-16T14:30:16
+Walltime reserved   : 00:20:00
+Walltime elapsed (%): 00:15:30  (77.5% * reserved)
+CPU-time elapsed    : 0.26 core-hours
+% CPU used (Total)  : 98.32%    (0.25 core-hours)
+% User CPU (Compute): 95.90%    (0.25 core-hours)
+% System CPU (I/O)  :  2.42%    (0.01 core-hours)
+Mem reserved        : 250M/node
+% Mem used (Max)    : 95.93%    (239.83M/node) 
+Max Disk Write      : 61.44K    (r2n20)
+Max Disk Read       : 28.54G    (r2n20)
+===========================================================================

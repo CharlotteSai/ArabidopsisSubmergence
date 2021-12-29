@@ -1,0 +1,80 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	STAR_mapping_SE
+	1
+
+[Fri Dec 20 16:38:49 2019]
+rule STAR_mapping_SE:
+    input: ../2_trimmed/gad1CS-sub-rep3_Trimmed.fastq.gz, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/chrLength.txt, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/chrNameLength.txt, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/chrName.txt, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/chrStart.txt, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/SA, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/SAindex, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/Genome, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/genomeParameters.txt
+    output: ../3_BAM/gad1CS-sub-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/gad1CS-sub-rep3.SJ.out.tab
+    log: ../3_BAM/log_files/gad1CS-sub-rep3.Log.out, ../3_BAM/log_files/gad1CS-sub-rep3.Log.progress.out, ../3_BAM/log_files/gad1CS-sub-rep3.Log.final.out, ../3_BAM/log_files/gad1CS-sub-rep3.Log.std.out
+    jobid: 0
+    wildcards: prefix=gad1CS-sub-rep3
+    threads: 8
+
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+Activating conda environment: /fast/users/a1673472/PEB_Arabidopsis_RNASeq/At_GABA_mutants_ying_Aug2019/snakemake/.snakemake/conda/08dd902b
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:2:12308:5729:12420': '15N4^GGA56' -> '15K4^GGA56'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:1:12105:17931:2146': '70G2N2' -> '70G2M2'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:1:12305:5830:20342': '72N3' -> '72M3'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:1:13101:5522:2906': '65N10' -> '65M10'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:4:12606:17004:14228': '60N15' -> '60M15'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:4:13603:18579:18515': '56N18' -> '56M18'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:4:11610:24280:1358': '54N21' -> '54M21'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:4:13612:25753:14053': '54N21' -> '54M21'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:1:23209:25001:5581': '44N31' -> '44M31'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:1:12201:21514:14580': '40N19C15' -> '40M19C15'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:3:12501:6220:4831': '40N35' -> '40M35'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:2:23303:2447:2522': '35N40' -> '35M40'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:2:23303:8627:5513': '35N40' -> '35M40'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:3:13412:19431:17368': '35N40' -> '35M40'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:3:23505:21795:10584': '35N40' -> '35M40'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:3:22408:17781:17656': '10N65' -> '10M65'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:4:12411:9868:11824': '9N37A28' -> '9M37A28'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:4:21410:15089:13243': '9N66' -> '9M66'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:1:13102:1366:9347': '7N68' -> '7M68'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:1:13103:26796:9338': '7N68' -> '7M68'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:2:11301:8069:9268': '7N68' -> '7M68'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:3:22508:10207:12783': '7N68' -> '7M68'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:4:22506:20028:15523': '7N68' -> '7M68'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:1:23107:4214:9819': '4N71' -> '4M71'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:2:11209:6677:13442': '4N71' -> '4M71'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:2:12106:21837:8774': '4N71' -> '4M71'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:2:23210:14088:12647': '4N71' -> '4M71'
+[bam_fillmd1] different MD for read 'NS500546:132:HLYJMBGX9:3:23409:3004:14367': '4N71' -> '4M71'
+[Fri Dec 20 16:50:29 2019]
+Finished job 0.
+1 of 1 steps (100%) done
+
+===========================================================================
+Phoenix Job Utilisation Reporting
+===========================================================================
+Job Name            : STAR_mapping_SE
+Job ID              : 20972770
+User                : a1673472
+Account             : waite
+Cluster             : phoenix
+Partition           : skylake
+Nodes (List)        : 1 (p2n31)
+Cores               : 8
+GPUs                : 0
+State               : COMPLETED
+Submit              : 2019-12-20T16:38:25
+Start               : 2019-12-20T16:38:46
+End                 : 2019-12-20T16:50:30
+Walltime reserved   : 01:00:00
+Walltime elapsed (%): 00:11:44  (19.6% * reserved)
+CPU-time elapsed    : 1.56 core-hours
+% CPU used (Total)  : 10.64%    (0.17 core-hours)
+% User CPU (Compute):  9.96%    (0.16 core-hours)
+% System CPU (I/O)  :  0.68%    (0.01 core-hours)
+Mem reserved        : 4G/node
+% Mem used (Max)    : 106.08%    (4.24G/node) 
+Max Disk Write      : 20.74G    (p2n31)
+Max Disk Read       : 25.78G    (p2n31)
+===========================================================================

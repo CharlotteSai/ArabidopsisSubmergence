@@ -1,0 +1,71 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	STAR_mapping_SE
+	1
+
+[Fri Dec 20 16:38:56 2019]
+rule STAR_mapping_SE:
+    input: ../2_trimmed/pop28-cont-rep3_Trimmed.fastq.gz, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/chrLength.txt, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/chrNameLength.txt, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/chrName.txt, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/chrStart.txt, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/SA, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/SAindex, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/Genome, ../At_genome/TAIR10_chr_all.fas.gz_STAR_index/genomeParameters.txt
+    output: ../3_BAM/pop28-cont-rep3.STARAligned_TAIR10.sortedByCoord.bam, ../3_BAM/pop28-cont-rep3.SJ.out.tab
+    log: ../3_BAM/log_files/pop28-cont-rep3.Log.out, ../3_BAM/log_files/pop28-cont-rep3.Log.progress.out, ../3_BAM/log_files/pop28-cont-rep3.Log.final.out, ../3_BAM/log_files/pop28-cont-rep3.Log.std.out
+    jobid: 0
+    wildcards: prefix=pop28-cont-rep3
+    threads: 8
+
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+WARNING: The conda.compat module is deprecated and will be removed in a future release.
+Activating conda environment: /fast/users/a1673472/PEB_Arabidopsis_RNASeq/At_GABA_mutants_ying_Aug2019/snakemake/.snakemake/conda/08dd902b
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:3:13506:25796:18014': '67N7' -> '67Y7'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:1:21110:26016:3721': '11N1N7N54' -> '11K1S7K54'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:1:12202:5900:1077': '4N71' -> '4K71'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:1:12206:16325:12628': '1N74' -> '1K74'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:2:13107:3166:4002': '49N4^GGA22' -> '49K4^GGA22'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:4:22401:7714:8214': '46N4^GGA25' -> '46K4^GGA25'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:4:23612:14713:20014': '74N1' -> '74M1'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:4:13511:17612:18992': '66N9' -> '66M9'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:2:23205:15865:16927': '35C25N13' -> '35C25M13'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:4:23412:17436:18868': '60N15' -> '60M15'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:1:12105:6227:4660': '59N16' -> '59M16'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:3:11506:15465:19117': '58N17' -> '58M17'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:2:13107:7462:6073': '40N34' -> '40M34'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:4:12504:19354:3442': '35N40' -> '35M40'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:1:12103:3210:1613': '21N54' -> '21M54'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:4:13610:16478:18410': '18N57' -> '18M57'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:4:12408:13160:19931': '9N66' -> '9M66'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:2:23211:10786:11492': '5N70' -> '5M70'
+[bam_fillmd1] different MD for read 'NS500546:131:HLYJWBGX9:1:22212:13796:11578': '3N72' -> '3M72'
+[Fri Dec 20 16:55:32 2019]
+Finished job 0.
+1 of 1 steps (100%) done
+
+===========================================================================
+Phoenix Job Utilisation Reporting
+===========================================================================
+Job Name            : STAR_mapping_SE
+Job ID              : 20972779
+User                : a1673472
+Account             : waite
+Cluster             : phoenix
+Partition           : skylake
+Nodes (List)        : 1 (b1c5n4)
+Cores               : 8
+GPUs                : 0
+State               : COMPLETED
+Submit              : 2019-12-20T16:38:27
+Start               : 2019-12-20T16:38:46
+End                 : 2019-12-20T16:55:32
+Walltime reserved   : 01:00:00
+Walltime elapsed (%): 00:16:46  (27.9% * reserved)
+CPU-time elapsed    : 2.24 core-hours
+% CPU used (Total)  :  6.61%    (0.15 core-hours)
+% User CPU (Compute):  6.15%    (0.14 core-hours)
+% System CPU (I/O)  :  0.46%    (0.01 core-hours)
+Mem reserved        : 4G/node
+% Mem used (Max)    : 86.88%    (3.48G/node) 
+Max Disk Write      : 16.64G    (b1c5n4)
+Max Disk Read       : 19.50G    (b1c5n4)
+===========================================================================

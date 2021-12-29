@@ -1,0 +1,35 @@
+STAR version=2.7.3a
+STAR compilation time,server,dir=Tue Oct 8 14:26:19 EDT 2019 vega:/home/dobin/data/STAR/STARcode/STAR.master/source
+##### Command Line:
+STAR --runMode alignReads --outStd BAM_SortedByCoordinate --outBAMcompression 0 --outTmpDir / --genomeDir ../At_genome/TAIR10_chr_all.fas_STAR_index --genomeLoad NoSharedMemory " #" coltrol how genome load to mem
+##### Initial USER parameters from Command Line:
+outTmpDir                         /
+outStd                            BAM_SortedByCoordinate
+###### All USER parameters from Command Line:
+runMode                       alignReads     ~RE-DEFINED
+outStd                        BAM_SortedByCoordinate     ~RE-DEFINED
+outBAMcompression             0     ~RE-DEFINED
+outTmpDir                     /     ~RE-DEFINED
+genomeDir                     ../At_genome/TAIR10_chr_all.fas_STAR_index     ~RE-DEFINED
+genomeLoad                    NoSharedMemory     ~RE-DEFINED
+##### Finished reading parameters from all sources
+
+##### Final user re-defined parameters-----------------:
+runMode                           alignReads
+genomeDir                         ../At_genome/TAIR10_chr_all.fas_STAR_index
+genomeLoad                        NoSharedMemory
+outTmpDir                         /
+outStd                            BAM_SortedByCoordinate
+outBAMcompression                 0
+
+-------------------------------
+##### Final effective command line:
+STAR   --runMode alignReads   --genomeDir ../At_genome/TAIR10_chr_all.fas_STAR_index   --genomeLoad NoSharedMemory   --outTmpDir /   --outStd BAM_SortedByCoordinate   --outBAMcompression 0
+----------------------------------------
+
+
+EXITING because of fatal ERROR: could not make temporary directory: //
+SOLUTION: (i) please check the path and writing permissions 
+ (ii) if you specified --outTmpDir, and this directory exists - please remove it before running STAR
+
+Dec 20 16:15:47 ...... FATAL ERROR, exiting
