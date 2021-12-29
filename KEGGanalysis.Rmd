@@ -14,6 +14,7 @@ library(KEGGREST)
 library(tidyverse)
 library(magrittr)
 library(tibble)
+library(pathview)
 ```
 based on some info from `https://ucdavis-bioinformatics-training.github.io/2018-June-RNA-Seq-Workshop/friday/enrichment.html`
 
@@ -49,7 +50,7 @@ gene2pathway <- lapply(names(pathway2gene), function(x){
   split(f = .$Gene) %>% 
   lapply(function(x){
     x[["pathwayID"]]
-  }) # 5114
+  }) # 5063
 ```
 
 ```{r DEgenes to collect kegg}
@@ -86,6 +87,7 @@ DGEs %>%
 # 1   175         43
 
 keggRes <- DGEs %>% 
+  extract(1:3) %>%
   lapply(function(des){
     DEgenes <- des$GeneID %>% intersect(names(gene2pathway))
     deGenes2kegg <- gene2pathway[DEgenes] 
@@ -164,7 +166,7 @@ keggHeat <- keggResfilter %>%
 
 mapdata <- keggHeat %>% 
   column_to_rownames("keggID") %>% 
-  dplyr::select(gad1SALK,gad21,gad1245,gad1245_special) 
+  dplyr::select(gad1SALK,gad21,gad1245) 
 
 label <- keggHeat$Description 
 names(label) <- keggHeat$keggID
@@ -186,12 +188,11 @@ pheatmap::pheatmap(mat = mapdata,
 # export::graph2office(x = KEGGheat, type = "ppt",
 #              file = "KEGG_Res.pptx", width = 6,
 #              aspectr = 1.4, append = TRUE)
-
 ```
 
 ```{r final results}
 # final kegg Results
-keggFinal <- keggResfilter%>% 
+keggFinal <- keggResfilter %>% 
   bind_rows() %>% 
   filter(adjP <= 0.05) %>% 
   split(f = .$Group)
@@ -199,3 +200,182 @@ keggFinal <- keggResfilter%>%
 # all KOI are marked in my goodnotes
 ```
 
+```{r kegg heatmap interpertation}
+# shared kegg with Col-0 baseline
+shared <- mapdata %>% 
+  filter(rowSums(.> 0) > 1) %>% 
+  arrange(gad1245,gad21, gad1SALK) %>% 
+  rownames()
+
+keggColor <- KEGGheat[["gtable"]][["grobs"]][[2]][["children"]][["GRID.rect.102"]][["gp"]][["fill"]]
+keggColor %<>% 
+  as.data.frame %>% 
+  rownames_to_column("keggID")
+
+keggResfilter %>% 
+  filter(keggID %in% shared) %>% 
+  select(Description,keggID) %>%
+  unique() %>% 
+  left_join(keggColor, by = "keggID") %>%
+  mutate(Class = keggGet(keggID)[[1]]$CLASS) %>% 
+  dplyr::select(Class, everything()) %>% 
+  arrange(Class) #%>% 
+  # write_csv("kegg2Col-0.csv")
+
+# unique
+gad1245k <- setdiff(keggFinal$gad1245$keggID,
+                    c(keggFinal$gad1SALK$keggID,keggFinal$gad21$keggID))
+
+gad21k <- setdiff(keggFinal$gad21$keggID,
+                    c(keggFinal$gad1SALK$keggID,keggFinal$gad1245$keggID))
+
+gad1SALKk <- setdiff(keggFinal$gad1SALK$keggID,
+                    c(keggFinal$gad21$keggID,keggFinal$gad1245$keggID))
+
+keggResfilter %>% 
+  filter(keggID %in% c(gad1SALKk,gad21k,gad1245k)) %>% 
+  select(Description,keggID) %>%
+  unique() %>% 
+  mutate(Class = keggGet(keggID)[[1]]$CLASS) %>% 
+  left_join(keggColor, by = "keggID") %>% 
+  select(Class,Description,keggID,everything()) %>% 
+  arrange(desc(Class)) #%>% 
+  # write_csv("kegg2Col-0unique.csv")
+
+# # gad1245_special
+# keggFinal$gad1245_special %>% 
+#   select(Description,keggID) %>%
+#   mutate(Class = keggGet(keggID)[[1]]$CLASS) %>% 
+#   left_join(keggColor, by = "keggID") %>% 
+#   write_csv("kegg2gad1245Special.csv")
+```
+
+```{r ath04016}
+mapk_exp <- DGEs %>%
+  lapply(function(de){
+    de %>% 
+      filter(GeneID %in% 
+               intersect(pathway2gene$ath04016,
+                         de$GeneID)) %>% 
+      select(GeneID, logFC, comparison)
+  }) %>% 
+  bind_rows() %>% 
+  reshape2::dcast(GeneID ~ comparison,
+                  value.var = "logFC") %>% 
+  select(GeneID,gad1SALK, gad21,gad1245) %>% 
+  column_to_rownames("GeneID")
+
+pathview(gene.data = mapk_exp, 
+         gene.idtype = "KEGG",
+         pathway.id = "04016", 
+         species = "ath",
+         na.col="transparent",
+         both.dirs = FALSE,
+         mid = list(gene = "blue"),
+         high = list(gene = "gray"),
+         limit= list(gene = c(-10,0)),
+         bins = list(gene = 11),
+         kegg.dir = "~/Box/Bioinfo/ArabidopsisSubmergence/pathview",
+         kegg.native = TRUE,
+         width = 70)
+```
+
+```{r}
+ath04075Exp <- DGEs %>%
+  lapply(function(de){
+    de %>% 
+      filter(GeneID %in% 
+               intersect(pathway2gene$ath04075,
+                         de$GeneID)) %>% 
+      select(GeneID, logFC, comparison)
+  }) %>% 
+  bind_rows() %>% 
+  reshape2::dcast(GeneID ~ comparison,
+                  value.var = "logFC") %>% 
+  select(GeneID,gad1SALK, gad21,gad1245) %>% 
+  column_to_rownames("GeneID")
+
+pathview(gene.data = ath04075Exp, 
+         gene.idtype = "KEGG",
+         pathway.id = "04075", 
+         species = "ath",
+         na.col="transparent",
+         both.dirs = TRUE,
+         low = list(gene = "blue"),
+         mid = list(gene = "gray"),
+         high = list(gene = "red"),
+         limit= list(gene = 6),
+         bins = list(gene = 12),
+         kegg.dir = "~/Box/Bioinfo/ArabidopsisSubmergence/pathview",
+         kegg.native = TRUE)
+```
+
+```{r}
+ath04712Exp <- DGEs %>%
+  lapply(function(de){
+    de %>% 
+      filter(GeneID %in% 
+               intersect(pathway2gene$ath04712,
+                         de$GeneID)) %>% 
+      dplyr::select(GeneID, logFC, comparison)
+  }) %>% 
+  bind_rows() %>% 
+  reshape2::dcast(GeneID ~ comparison,
+                  value.var = "logFC") %>% 
+  dplyr::select(GeneID,gad1SALK, gad21,gad1245) %>% 
+  column_to_rownames("GeneID")
+
+pathview(gene.data = ath04712Exp, 
+         gene.idtype = "KEGG",
+         pathway.id = "04712", 
+         species = "ath",
+         na.col="transparent",
+         both.dirs = TRUE,
+         low = list(gene = "blue"),
+         mid = list(gene = "gray"),
+         high = list(gene = "red"),
+         limit= list(gene = 5),
+         bins = list(gene = 12),
+         kegg.dir = "~/Box/Bioinfo/ArabidopsisSubmergence/pathview",
+         kegg.native = TRUE)
+```
+
+```{r}
+ath00500Exp <- DGEs %>%
+  lapply(function(de){
+    de %>% 
+      filter(GeneID %in% 
+               intersect(pathway2gene$ath00500,
+                         de$GeneID)) %>% 
+      dplyr::select(GeneID, logFC, comparison)
+  }) %>% 
+  bind_rows() %>% 
+  reshape2::dcast(GeneID ~ comparison,
+                  value.var = "logFC") %>% 
+  dplyr::select(GeneID,gad1SALK, gad21,gad1245) %>%
+  column_to_rownames("GeneID")
+
+#      GeneID gad1SALK    gad21  gad1245
+# 1 AT1G69830       NA       NA 1.012373
+# 2 AT2G36390       NA 1.122267 1.760666
+# 3 AT3G46970 1.143916 1.511535 1.741741
+# 4 AT4G09020       NA 1.440889 1.984440
+# 5 AT5G64860       NA       NA 1.225221
+
+
+pathview(gene.data = ath00500Exp, 
+         gene.idtype = "KEGG",
+         pathway.id = "00500", 
+         species = "ath",
+         na.col="transparent",
+         both.dirs = TRUE,
+         low = list(gene = "blue"),
+         mid = list(gene = "gray"),
+         high = list(gene = "red"),
+         limit= list(gene = 8),
+         bins = list(gene = 12),
+         kegg.dir = "~/Box/Bioinfo/ArabidopsisSubmergence/pathview",
+         kegg.native = TRUE,
+         # map.symbol=TRUE,
+         same.layer = TRUE)
+```

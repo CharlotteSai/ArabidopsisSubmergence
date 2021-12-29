@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(magrittr)
 library(edgeR)
+library(UpSetR)
 ```
 
 ```{r data clean up}
@@ -71,9 +72,9 @@ mds %>%
   labs(x = "BCV distance 1",
        y = "BCV distance 2") -> mdsplot
 
-export::graph2office(x = mdsplot, type = "ppt",
-             file = "Arabidopsis_MDS.pptx", width = 6,
-             aspectr = 1.5, append = TRUE)
+# export::graph2office(x = mdsplot, type = "ppt",
+#              file = "Arabidopsis_MDS.pptx", width = 6,
+#              aspectr = 1.5, append = TRUE)
 ```
 
 ```{r estimating dispersions}
@@ -98,8 +99,9 @@ myContrast <- makeContrasts(
   gad1245 = gad1245 - Col,
   # gad2OEB33 = gad2OEB33 - Col,
   # pop28 = pop28 - Col,
-  gad1245_special = gad1245 - (gad21 + Col)/2, 
+  # gad1245_special = gad1245 - (gad21 + Col)/2, 
   # gad1245 diff compare to wt apart from the diff form gad21
+  gad1245_gad2 = gad1245 - gad21,
   levels = designMat
   )
 ```
@@ -111,9 +113,11 @@ deRes <- lapply(colnames(myContrast), function(i){
   qlf$table %>% 
   rownames_to_column("GeneID") %>% 
   mutate(adj.p = p.adjust(PValue, method = "BH"),
-         comparison = ifelse(i != "gad1245_special",
-                             paste0(i,"-wt"),
-                             i))
+         comparison = i
+         # comparison = ifelse(i != "gad1245_special",
+         #                     paste0(i,"-wt"),
+         #                     i)
+         )
 })
 names(deRes) <- colnames(myContrast)
 
@@ -161,8 +165,10 @@ deRes %>%
                              ifelse(logFC >= 1 ,'Up','Down'),
                              'Stable'),
          expression = fct_relevel(expression, "Up","Stable","Down"),
-         comparison = factor(comparison, levels = c("gad1SALK-wt","gad21-wt",
-                                                    "gad1245-wt","gad1245_special"))) %>%
+         comparison = factor(comparison, 
+                             levels = c("gad1SALK","gad21",
+                                        "gad1245","gad1245_special",
+                                        "gad1245_gad2"))) %>%
   ggplot(aes(x = logFC, 
              y = -log10(adj.p), 
              colour = expression)) +
@@ -190,9 +196,9 @@ deRes %>%
 #                      file = "Arabidopsis_vocano.pptx", width = 10,
 #                      aspectr = 1.5)  #export as pdf then change
 # 
-# export::graph2png(x = Vocano, 
-#                   file = "Arabidopsis_vocano.png", width = 10,
-#                   aspectr = 1)  
+# export::graph2png(x = Vocano,
+#                   file = "Arabidopsis_vocano1.png", width = 10,
+#                   aspectr = 1)
 
 deRes %>% 
   bind_rows() %>% 
@@ -202,7 +208,37 @@ deRes %>%
              ncol = 2)
 ```
 
-```{r}
+```{r DE heatmap}
+DEheat <- deRes %>% 
+  bind_rows() %>% 
+  group_by(GeneID) %>% 
+  filter(any(adj.p <= 0.05 & abs(logFC) >= 1)) %>% 
+  select(GeneID, logFC, adj.p, comparison) %>% 
+  mutate(logFC = ifelse(adj.p <= 0.05 & abs(logFC) >= 1, logFC, 0)) %>% 
+  select(-adj.p) 
+
+paletteLength <- 100
+myBreaks <- c(seq(min(DEheat$logFC), 0, 
+                  length.out = ceiling(paletteLength/2)), 
+              seq(max(DEheat$logFC)/paletteLength, max(DEheat$logFC), length.out=floor(paletteLength/2)))
+myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
+
+DEheat %<>% 
+  reshape2::dcast(GeneID ~ comparison,
+                  value.var = "logFC") %>% 
+  select(GeneID, `gad1SALK`, `gad21`,
+         `gad1245`) %>% 
+  column_to_rownames("GeneID")
+
+DEheat %>% 
+  pheatmap::pheatmap(cluster_cols = FALSE,
+                     cluster_rows = TRUE,
+                     show_rownames = FALSE,
+                     color = myColor,
+                     breaks = myBreaks) 
+```
+
+```{r vennDiagram}
 deRes %>% lapply(function(g){
   g %>% 
   mutate(sig = ifelse(adj.p <= 0.05 & abs(logFC) >= 1,
@@ -239,5 +275,27 @@ lapply(str_subset(names(deRes), "gad21|gad1245"), function(g){
   vennDiagram(circle.col=c("turquoise", "salmon","slateblue"))
 
 # save.image("~/Box/Bioinfo/ArabidopsisSubmergence/DGEs.RData")
+```
+
+```{r}
+lt <- list(gad1245_avecol0_gad2 = DGEs$gad1245_special$GeneID,
+           gad1245_gad2 = DGEs$gad1245_gad2$GeneID,
+           gad21_Col0 = DGEs$gad21$GeneID,
+           gad1245_Col0 = DGEs$gad1245$GeneID
+           )
+
+lt %>% 
+  fromList() %>% 
+  upset(order.by = "freq",
+        keep.order = TRUE,
+        sets.x.label = "DE genes per comparison",
+        mainbar.y.label = "Number of DE genes",
+        text.scale = c(1.7, 1.3, 1.3, 1, 1.7, 1.5)) -> upsetPlot
+# c(intersection size title, intersection size tick labels, set size title, set size tick labels, set names, numbers above bars)
+
+export::graph2office(x = upsetPlot, type = "ppt",
+             file = "upset.pptx", width = 8,
+             aspectr = 1.8, append = TRUE)
+
 ```
 

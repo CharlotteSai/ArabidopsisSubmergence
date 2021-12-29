@@ -36,7 +36,7 @@ go <- getBM(attributes=c("ensembl_gene_id","go_id"), mart=m) %>%
 # attach go terms to each gene
 gene2GO <- go %>%
   filter(!is.na(GO_terms)) %>%
-  filter(GO_terms != "") %>% # this somehow makes GO result in less...
+  filter(GO_terms != "") %>% # this remove genes link with "" that is no use to this analysis
   distinct(GeneID,GO_terms) %>% 
   split(f = .$GeneID) %>%
   mclapply(function(x){
@@ -94,6 +94,7 @@ DGEs %>%
 #--------------------------------#
 
 goRes <- DGEs %>% 
+  extract(1:3) %>% 
   lapply(function(treatDE){
     treatDE %>% 
       split(f = .$expression) %>% 
@@ -169,7 +170,7 @@ goRes_filter <- names(goRes) %>%
 ```
 
 ```{r}
-# prepare p with direction
+# prepare p with direction with merged regulation
 goHeat <- goRes_filter %>%
   bind_rows() %>% 
   mutate(p = ifelse(adjP < 0.05, p, 1),
@@ -180,6 +181,7 @@ myBreaks <- c(seq(min(goHeat$p), 0,
               seq(max(goHeat$p)/paletteLength, max(goHeat$p), length.out=floor(paletteLength/2)))
 myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
 
+# if merge up/down regulation
 goHeat %<>% 
   dplyr::select(GO_term,Description,expression,ontology,Group,p) %>% 
   reshape2::dcast(GO_term + Description + Group + ontology ~ expression,
@@ -197,7 +199,7 @@ goHeat %<>%
   mutate_all(~replace(., is.na(.), 0))
 
 mapdata <- goHeat %>% 
-  dplyr::select(gad1SALK,gad21,gad1245,gad1245_special) %>% 
+  dplyr::select(gad1SALK,gad21,gad1245) %>% 
   set_rownames(rownames(goHeat))
 
 Annos <- goHeat %>% 
@@ -209,12 +211,356 @@ names(GOnames) <- rownames(goHeat)
 pheatmap::pheatmap(mat = mapdata,
                    cluster_cols = FALSE,
                    annotation_row = Annos,
-                   # show_rownames = FALSE,
+                   show_rownames = FALSE,
                    breaks = myBreaks,
                    color = myColor,
                    labels_row = GOnames,
                    angle_col = 45
-) 
+) -> GoHeatmap
 
+# export
+# export::graph2office(x = GoHeatmap, type = "ppt",
+#              file = "GO_Res.pptx", width = 8,
+#              aspectr = 1.4, append = TRUE)
+
+#=====================================================================#
+# if plot up/down split
+goRes_filter %>%
+  # extract(1) %>%
+  lapply(function(go){
+    go_heat <- go %>% 
+      mutate(p = ifelse(adjP < 0.05, p, 1),
+             p = -log10(p)) %>% 
+      reshape2::dcast(GO_term + Description +  ontology ~ Group,
+                  value.var = "p") %>% 
+      mutate_all(~replace(., is.na(.), 0)) %>% 
+      column_to_rownames("GO_term")
+    
+    reg <- unique(go$expression)
+    paletteLength <- ifelse(reg == "Up", 20, 50)
+    myColor <- colorRampPalette(c("white",
+      ifelse(reg == "Up", "firebrick1", "blue"))
+    )(paletteLength)
+    
+    mapdata <- go_heat %>% 
+      dplyr::select(gad1SALK,gad21,gad1245)
+    Annos <- go_heat %>% 
+      dplyr::select(ontology)
+    
+    pheatmap::pheatmap(mat = mapdata,
+                   cluster_cols = FALSE,
+                   annotation_row = Annos,
+                   show_rownames = TRUE,
+                   color = myColor,
+                   angle_col = 45
+)
+  }) -> GoHeatmap1
+
+# export
+export::graph2office(x = GoHeatmap1$Up, type = "ppt",
+             file = "GO_Res.pptx", width = 5,
+             aspectr = 1.6, append = TRUE)
+# down - 8/11.42=0.7
+# up - 5/3=1.6
 ```
 
+```{r}
+goHeat %>%
+  mutate(gad1245 = gad1245 != 0, 
+         gad1SALK = gad1SALK != 0,
+         gad21 = gad21 != 0) %>% 
+  filter(rowSums(.[,4:6]) >1) %>% 
+  unique()
+```
+
+```{r}
+goFinal <- goRes_filter %>% 
+  bind_rows() %>% 
+  filter(adjP <= 0.05) %>%
+  split(f = .$Group)
+```
+
+```{r direct related GO to gad1245-gad2}
+DGEs$gad1245_gad2$GeneID %>% 
+  lapply(function(g){
+    go %>% 
+      filter(GeneID == g) %>%
+      left_join(goSummaries, by = c("GO_terms" = "id")) %>% 
+      mutate(Description = str_to_sentence(
+        annotate::Term(as.character(GO_terms)))
+        ) %>% 
+      dplyr::select(GeneID, GO_terms, Description, ontology)
+  }) %>% 
+  bind_rows() %>% 
+  na.omit()
+```
+
+```{r polysaccharide}
+gad1245Go_uniqUp <- goFinal$gad1245 %>% 
+  filter(GO_term %in% setdiff(goFinal$gad1245$GO_term,c(goFinal$gad1SALK$GO_term, goFinal$gad21$GO_term)) & expression == "Up") %>% pull(GO_term) %>% 
+  lapply(function(x){
+    de <- DGEs$gad1245 %>%
+      filter(expression == "Up") %>%
+      pull(GeneID)
+    go2Gene[[x]] %>%
+      intersect(de)
+  })
+# all this unique up-regulated GO functions are covered with "GO:0005976" with following genes:
+#  [1] "AT1G10760" "AT1G19940" "AT1G65310" "AT1G68050" "AT1G69830" "AT2G06850" "AT2G36390"
+#  [8] "AT3G46970" "AT3G52180" "AT3G55760" "AT4G09020" "AT5G05170" "AT5G06700" "AT5G26570"
+# [15] "AT5G60920" "AT5G64860" "AT5G09730" "AT2G33570" "AT3G09540" "AT4G32460" "AT4G33220"
+
+gad1245Go_uniqUp[[6]] %>% 
+  lapply(function(g){
+    tibble(gene = g,
+           in_pathway = gene2pathway[[g]]) 
+  }) %>% 
+  bind_rows() %>% 
+  na.omit() %>% 
+  split(f = .$in_pathway) %>% 
+  lapply(function(x){
+    x %>% 
+        mutate(keggDef = str_remove(KEGGREST::keggGet(in_pathway)[[1]]$NAME,
+                                    " - Arabidopsis thaliana \\(thale cress\\)"),
+         goLink = KEGGREST::keggGet(in_pathway)[[1]]$DBLINKS) %>% as.data.frame()
+  })
+
+gad1245Go_uniqUp[[6]] %>% 
+  lapply(function(g){
+        go %>% 
+            filter(GeneID == g) %>%
+            left_join(goSummaries, by = c("GO_terms" = "id")) %>% 
+            mutate(Description = str_to_sentence(
+                annotate::Term(as.character(GO_terms)))
+            ) %>% 
+        filter(shortest_path >= 4) %>% 
+        dplyr::select(GeneID, GO_terms, Description, ontology)
+    }) 
+```
+
+```{r}
+sharedGO <- goHeat %>%
+  mutate(gad1245 = gad1245 != 0, 
+         gad1SALK = gad1SALK != 0,
+         gad21 = gad21 != 0) %>% 
+  filter(rowSums(.[,4:6]) >1) %>% 
+  pull(GO_term)
+
+goFinal %>% 
+  lapply(function(g){
+    g %>% 
+      filter(GO_term %in% sharedGO) %>% 
+      mutate(geneRatio = paste0(DECount,"/",N),
+             Description = str_to_sentence(Description)) %>% 
+      select(GO_term,Description,geneRatio,
+             ontology,Group,expression) 
+  }) %>% 
+  bind_rows() %>% 
+  reshape2::dcast(GO_term + Description + ontology + expression ~ Group,
+                  value.var = "geneRatio") %>% 
+  arrange(desc(expression),ontology) #%>% 
+  # write_csv("sharedGO.csv")
+```
+
+```{r gad1-NutrientStarvation}
+goFinal$gad1SALK %>% 
+    filter(GO_term %in% c("GO:0009267","GO:0031667","GO:0031669") & expression == "Down") %>% pull(GO_term) %>% 
+    lapply(function(x){
+        de <- DGEs$gad1SALK %>%
+            filter(expression == "Down") %>%
+            pull(GeneID)
+        go2Gene[[x]] %>%
+            intersect(de)
+    }) %>% unlist() %>% unique() %>% 
+    lapply(function(g){
+        go %>% 
+            filter(GeneID == g) %>%
+            left_join(goSummaries, by = c("GO_terms" = "id")) %>% 
+            mutate(Description = str_to_sentence(
+                annotate::Term(as.character(GO_terms)))
+            ) %>% 
+        filter(shortest_path >= 4) %>% 
+        dplyr::select(GeneID, GO_terms, Description, ontology)
+    }) %>%
+  bind_rows() %>%
+  group_by(GeneID) %>% 
+  filter(any(str_detect(Description, "starvation| nutrient"))) %>% 
+  arrange(GeneID,GO_terms) %>% write_csv("GOnutrientStarvation.csv")
+```
+
+```{r gad2 hypoxia}
+goFinal$gad21 %>% 
+  filter(expression == "Up") %>% 
+  pull(GO_term) %>% 
+  lapply(function(x){
+    de <- DGEs$gad21 %>%
+            filter(expression == "Up") %>%
+            pull(GeneID)
+        go2Gene[[x]] %>%
+            intersect(de)
+    }) %>% 
+  unlist() %>% 
+  unique() %>% 
+  lapply(function(g){
+    tibble(gene = g,
+           in_pathway = gene2pathway[[g]])
+  }) %>% 
+  bind_rows() %>% 
+  na.omit() %>% 
+  split(f = .$in_pathway) %>% 
+  lapply(function(x){
+    x %>% 
+        mutate(keggDef = str_remove(KEGGREST::keggGet(in_pathway)[[1]]$NAME,
+                              " - Arabidopsis thaliana \\(thale cress\\)"),
+         goLink = KEGGREST::keggGet(in_pathway)[[1]]$DBLINKS) %>%
+      as.data.frame()
+  })
+# 2/13 have mapped to kegg
+# $ath00500
+#        gene in_pathway                       keggDef              goLink
+# 1 AT3G43190   ath00500 Starch and sucrose metabolism GO: 0005982 0005985
+# 
+# $ath04626
+#        gene in_pathway                    keggDef
+# 1 AT2G41100   ath04626 Plant-pathogen interaction
+
+goFinal$gad21 %>% 
+  filter(expression == "Up") %>% 
+  pull(GO_term) %>% 
+  lapply(function(x){
+    de <- DGEs$gad21 %>%
+            filter(expression == "Up") %>%
+            pull(GeneID)
+        go2Gene[[x]] %>%
+            intersect(de)
+    }) %>% 
+  unlist() %>% 
+  unique() %>% 
+  lapply(function(g){
+        go %>% 
+            filter(GeneID == g) %>%
+            left_join(goSummaries, by = c("GO_terms" = "id")) %>% 
+            mutate(Description = str_to_sentence(
+                annotate::Term(as.character(GO_terms)))
+            ) %>% 
+        filter(shortest_path >= 4) %>% 
+        dplyr::select(GeneID, GO_terms, Description, ontology)
+    }) %>%
+  bind_rows()
+
+hpGO <- goFinal$gad21 %>% 
+  filter(expression == "Up") %>% 
+  pull(GO_term) 
+hp_heat <- DGEs %>%
+    lapply(function(de){
+      de %>% 
+        filter(GeneID %in% 
+                 intersect(unlist(go2Gene[hpGO]),
+                           de$GeneID)) %>% 
+        dplyr::select(GeneID, logFC, comparison)
+    }) %>% 
+  bind_rows() %>% 
+  reshape2::dcast(GeneID ~ comparison,
+                  value.var = "logFC") %>% 
+  dplyr::select(GeneID,gad1SALK, gad21,gad1245) %>% 
+  column_to_rownames("GeneID") %>% 
+  mutate_all(~replace(., is.na(.), 0))
+
+
+paletteLength <- 100
+myBreaks <- c(seq(min(hp_heat), 0, 
+                  length.out = ceiling(paletteLength/2) + 1), 
+              seq(max(hp_heat)/paletteLength, max(hp_heat), length.out=floor(paletteLength/2)))
+myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
+
+pheatmap::pheatmap(mat = hp_heat,
+                   cluster_cols = FALSE,
+                   # annotation_row = Annos,
+                   show_rownames = TRUE,
+                   breaks = myBreaks,
+                   color = myColor,
+                   # labels_row = GOnames,
+                   angle_col = 45
+) -> hpGeneHeat
+
+# # export
+# export::graph2office(x = hpGeneHeat, type = "ppt",
+#              file = "GO_Res.pptx", width = 4,
+#              aspectr = 0.6, append = TRUE)
+```
+
+```{r cold accumulation}
+cold <- DGEs %>%
+    lapply(function(de){
+      de %>% 
+        filter(GeneID %in% 
+                 intersect(unlist(go2Gene["GO:0009631"]),
+                           de$GeneID)) %>% 
+        dplyr::select(GeneID, logFC, comparison)
+    }) %>% 
+  bind_rows() %>% 
+  reshape2::dcast(GeneID ~ comparison,
+                  value.var = "logFC") %>% 
+  dplyr::select(GeneID,gad1SALK, gad21,gad1245) %>% 
+  column_to_rownames("GeneID") %>% 
+  mutate_all(~replace(., is.na(.), 0))
+
+paletteLength <- 100
+myBreaks <- c(seq(min(cold), 0, 
+                  length.out = ceiling(paletteLength/2) + 1), 
+              seq(max(cold)/paletteLength, max(cold), length.out=floor(paletteLength/2)))
+myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
+
+pheatmap::pheatmap(mat = cold,
+                   cluster_cols = FALSE,
+                   # annotation_row = Annos,
+                   show_rownames = TRUE,
+                   breaks = myBreaks,
+                   color = myColor,
+                   # labels_row = GOnames,
+                   angle_col = 45
+) -> coldGeneHeat
+
+# # export
+# export::graph2office(x = coldGeneHeat, type = "ppt",
+#              file = "GO_Res.pptx", width = 4,
+#              aspectr = 0.6, append = TRUE)
+```
+
+```{r ABA}
+ABA <- DGEs %>%
+    lapply(function(de){
+      de %>% 
+        filter(GeneID %in% 
+                 intersect(unlist(go2Gene["GO:0009737"]),
+                           de$GeneID)) %>% 
+        dplyr::select(GeneID, logFC, comparison)
+    }) %>% 
+  bind_rows() %>% 
+  reshape2::dcast(GeneID ~ comparison,
+                  value.var = "logFC") %>% 
+  dplyr::select(GeneID,gad1SALK, gad21,gad1245) %>% 
+  column_to_rownames("GeneID") %>% 
+  mutate_all(~replace(., is.na(.), 0))
+
+paletteLength <- 100
+myBreaks <- c(seq(min(ABA), 0, 
+                  length.out = ceiling(paletteLength/2) + 1), 
+              seq(max(ABA)/paletteLength, max(ABA), length.out=floor(paletteLength/2)))
+myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
+
+pheatmap::pheatmap(mat = ABA,
+                   cluster_cols = FALSE,
+                   # annotation_row = Annos,
+                   show_rownames = TRUE,
+                   breaks = myBreaks,
+                   color = myColor,
+                   # labels_row = GOnames,
+                   angle_col = 45
+) -> ABAGeneHeat
+
+# # export
+# export::graph2office(x = coldGeneHeat, type = "ppt",
+#              file = "GO_Res.pptx", width = 4,
+#              aspectr = 0.6, append = TRUE)
+```
