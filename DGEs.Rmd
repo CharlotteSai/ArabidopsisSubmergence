@@ -61,7 +61,6 @@ mds <- plotMDS(countList, method="bcv", col=as.numeric(countList$samples$group),
 mds %>%
   extract(c(9,10)) %>%
   as.data.frame() %>%
-  rownames_to_column("sample") %>%
   mutate(sample = meta$sample) %>% # the order is same as meta so I borrowed the sample name
   left_join(meta) %>%
   ggplot(aes(x = x, y = y)) +
@@ -101,7 +100,7 @@ myContrast <- makeContrasts(
   )
 ```
 
-```{r find DE genes and corisponding vocano plots}
+```{r find DE genes}
 # run a loop to go through test by each phenotype compare to wt (Col)
 deRes <- lapply(colnames(myContrast), function(i){
   qlf <- glmQLFTest(fit, contrast = myContrast[,i])
@@ -112,42 +111,6 @@ deRes <- lapply(colnames(myContrast), function(i){
          )
 })
 names(deRes) <- colnames(myContrast)
-
-vocanoPlots <- lapply(colnames(myContrast), function(i){
-  lim = max(abs(deRes[[i]]$logFC))
-  deRes[[i]] %>% 
-  mutate(expression = ifelse(adj.p <= 0.05 & abs(logFC) >= 1, 
-                             ifelse(logFC >= 1 ,'Up','Down'),
-                             'Stable')) %>% 
-  ggplot(aes(x = logFC, 
-             y = -log10(adj.p), 
-             colour = expression)) +
-  geom_point(alpha = 0.4, size = 3.5) +
-  scale_color_manual(values=c("blue", "grey","red"))+
-  xlim(c(-lim - 0.5,
-         lim + 0.5)) +
-  geom_vline(xintercept = c(-1,1),
-             lty=4,col="black",
-             lwd=0.8) +
-  geom_hline(yintercept = -log10(0.05),
-             lty=4,col="black",
-             lwd=0.8) +
-  labs(x="log2(fold change)",
-       y="-log10 (adj.p-value)")  +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5), 
-        legend.position="right", 
-        legend.title = element_blank())
-})
-names(vocanoPlots) <- colnames(myContrast)
-
-p_dist <- lapply(colnames(myContrast), function(i){
-  deRes[[i]] %>% 
-    filter(adj.p <= 0.05 & abs(logFC) >= 1) %>% 
-    ggplot(aes(x = -log10(adj.p))) +
-    geom_histogram()
-})
-names(p_dist) <- colnames(myContrast)
 ```
 
 ```{r vocano plot}
@@ -182,14 +145,6 @@ deRes %>%
         plot.title = element_text(hjust = 0.5), 
         # axis.text.x = element_text(vjust = -1),
         legend.position = "none") -> Vocano
-
-# export::graph2office(x = Vocano, type = "ppt",
-#                      file = "Arabidopsis_vocano.pptx", width = 10,
-#                      aspectr = 1.5)  #export as pdf then change
-# 
-# export::graph2png(x = Vocano,
-#                   file = "Arabidopsis_vocano1.png", width = 10,
-#                   aspectr = 1)
 
 deRes %>% 
   bind_rows() %>% 
@@ -240,7 +195,6 @@ deRes %>% lapply(function(g){
 }) %>% 
   as.data.frame() %>%
   vennDiagram()
-
 ```
 
 ```{r prepare DGEs for GO}
@@ -265,10 +219,13 @@ lapply(str_subset(names(deRes), "gad21|gad1245"), function(g){
   vennDiagram(circle.col=c("turquoise", "salmon","slateblue"))
 
 # deRes %>%
-#   bind_rows() %>%head()
+#   bind_rows() %>%
+#   mutate(comparison = ifelse(comparison != "gad1245_gad2",
+#                              paste0(comparison,"-Col-0"),
+#                              "gad1245-gad2")) %>% 
 #   write_csv("./output_results/DGEList.csv")
 
-# save.image("~/Box/Bioinfo/ArabidopsisSubmergence/DGEs.RData")
+# save.image("~/Library/CloudStorage/Box-Box/Bioinfo/ArabidopsisSubmergence/DGEs.RData")
 ```
 
 ```{r upset plot}

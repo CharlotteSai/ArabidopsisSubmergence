@@ -80,7 +80,7 @@ DGEs %>%
 # # A tibble: 1 × 2
 #    n.de n.deWithGO
 #   <int>      <int>
-# 1  1022        261
+# 1  1022        260
 # 
 # $gad1245
 # # A tibble: 1 × 2
@@ -206,6 +206,8 @@ keggFinal <- keggResfilter %>%
 #   }) %>%
 #   bind_rows() %>%
 #   write_csv("./output_results/KeggResults.csv")
+
+# save.image("~/Library/CloudStorage/Box-Box/Bioinfo/ArabidopsisSubmergence/KeggRes.RData")
 ```
 
 ```{r kegg heatmap interpertation}

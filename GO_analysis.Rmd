@@ -286,6 +286,7 @@ goFinal <- goRes_filter %>%
 #   bind_rows() %>% 
 #   write_csv("./output_results/GoResults.csv")
 
+# save.image("~/Library/CloudStorage/Box-Box/Bioinfo/ArabidopsisSubmergence/GoRes.RData")
 ```
 
 ```{r direct related GO to gad1245-gad2}
