@@ -1,0 +1,37 @@
+                                 Started job on |	Dec 20 16:38:58
+                             Started mapping on |	Dec 20 16:38:59
+                                    Finished on |	Dec 20 16:56:51
+       Mapping speed, Million of reads per hour |	85.24
+
+                          Number of input reads |	25383229
+                      Average input read length |	75
+                                    UNIQUE READS:
+                   Uniquely mapped reads number |	23410825
+                        Uniquely mapped reads % |	92.23%
+                          Average mapped length |	75.76
+                       Number of splices: Total |	4849210
+            Number of splices: Annotated (sjdb) |	0
+                       Number of splices: GT/AG |	4805988
+                       Number of splices: GC/AG |	41541
+                       Number of splices: AT/AC |	1530
+               Number of splices: Non-canonical |	151
+                      Mismatch rate per base, % |	0.09%
+                         Deletion rate per base |	0.00%
+                        Deletion average length |	1.33
+                        Insertion rate per base |	0.00%
+                       Insertion average length |	1.10
+                             MULTI-MAPPING READS:
+        Number of reads mapped to multiple loci |	822543
+             % of reads mapped to multiple loci |	3.24%
+        Number of reads mapped to too many loci |	644
+             % of reads mapped to too many loci |	0.00%
+                                  UNMAPPED READS:
+  Number of reads unmapped: too many mismatches |	23492
+       % of reads unmapped: too many mismatches |	0.09%
+            Number of reads unmapped: too short |	1125724
+                 % of reads unmapped: too short |	4.43%
+                Number of reads unmapped: other |	1
+                     % of reads unmapped: other |	0.00%
+                                  CHIMERIC READS:
+                       Number of chimeric reads |	0
+                            % of chimeric reads |	0.00%

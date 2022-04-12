@@ -1,0 +1,37 @@
+                                 Started job on |	Dec 20 16:39:00
+                             Started mapping on |	Dec 20 16:39:01
+                                    Finished on |	Dec 20 16:56:30
+       Mapping speed, Million of reads per hour |	75.94
+
+                          Number of input reads |	22129421
+                      Average input read length |	75
+                                    UNIQUE READS:
+                   Uniquely mapped reads number |	19644971
+                        Uniquely mapped reads % |	88.77%
+                          Average mapped length |	75.76
+                       Number of splices: Total |	4031812
+            Number of splices: Annotated (sjdb) |	0
+                       Number of splices: GT/AG |	3996605
+                       Number of splices: GC/AG |	32591
+                       Number of splices: AT/AC |	2436
+               Number of splices: Non-canonical |	180
+                      Mismatch rate per base, % |	0.10%
+                         Deletion rate per base |	0.01%
+                        Deletion average length |	1.34
+                        Insertion rate per base |	0.00%
+                       Insertion average length |	1.09
+                             MULTI-MAPPING READS:
+        Number of reads mapped to multiple loci |	783518
+             % of reads mapped to multiple loci |	3.54%
+        Number of reads mapped to too many loci |	1475
+             % of reads mapped to too many loci |	0.01%
+                                  UNMAPPED READS:
+  Number of reads unmapped: too many mismatches |	21761
+       % of reads unmapped: too many mismatches |	0.10%
+            Number of reads unmapped: too short |	1677695
+                 % of reads unmapped: too short |	7.58%
+                Number of reads unmapped: other |	1
+                     % of reads unmapped: other |	0.00%
+                                  CHIMERIC READS:
+                       Number of chimeric reads |	0
+                            % of chimeric reads |	0.00%
